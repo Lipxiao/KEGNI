@@ -1,17 +1,15 @@
 #!/usr/bin/python3
-from dataset import KGEDataset
-from torch.utils.data import DataLoader
-import pandas as pd
-import datetime
-import numpy as np
-
-current_time = datetime.datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
-# 日志文件名加上当前时间
-log_filename = f"my_log_{formatted_time}.log"
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from dataset import KGEDataset
+from torch.utils.data import DataLoader
+import datetime
+
+current_time = datetime.datetime.now()
+formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
+
+log_filename = f"my_log_{formatted_time}.log"
 
 
 class BidirectionalOneShotIterator(object):
@@ -19,7 +17,7 @@ class BidirectionalOneShotIterator(object):
         self.iterator_head = self.one_shot_iterator(dataloader_head)
         self.iterator_tail = self.one_shot_iterator(dataloader_tail)
         self.step = 0
-        
+
     def __next__(self):
         self.step += 1
         if self.step % 2 == 0:
@@ -27,7 +25,7 @@ class BidirectionalOneShotIterator(object):
         else:
             data = next(self.iterator_tail)
         return data
-    
+
     @staticmethod
     def one_shot_iterator(dataloader):
         '''
@@ -38,17 +36,16 @@ class BidirectionalOneShotIterator(object):
                 yield data
 
 
-
 class KGEdataloader():
     def __init__(self, **kwargs):
         kge_data = kwargs.get("kge_data")
         sc_dataset = kwargs.get("sc_dataset")
         self.negative_sample_size = kwargs.get("negative_sample_size")
         self.batch_size = kwargs.get("batch_size")
-        self.kgg_kgg_triples, self.scg_scg_triples, self.scg_kgg_triples, self.kgg_scg_triples, self.kgg2id, self.relation2id, self.scg2id = self.data_process(kge_data,sc_dataset)
-        
-    @staticmethod    
-    def data_process(kge_data,sc_dataset):
+        self.kgg_kgg_triples, self.scg_scg_triples, self.scg_kgg_triples, self.kgg_scg_triples, self.kgg2id, self.relation2id, self.scg2id = self.data_process(kge_data, sc_dataset)
+
+    @staticmethod
+    def data_process(kge_data, sc_dataset):
         kge_data[0] = kge_data[0].str.upper()
         kge_data[2] = kge_data[2].str.upper()
         kgg = (set(kge_data[0].tolist() + kge_data[2].tolist()))-set(sc_dataset.node2id.keys())
@@ -60,88 +57,79 @@ class KGEdataloader():
         scg_scg_triples = []
         scg_kgg_triples = []
         kgg_scg_triples = []
-    
+
         for index, row in kge_data.iterrows():
             h, r, t = row[0], row[1], row[2]
             if ((h in kgg) & (t in kgg)):
                 kgg_kgg_triples.append((kgg2id[h], relation2id[r], kgg2id[t]))
             elif (h in scg2id) & (t in scg2id):
-                scg_scg_triples.append((scg2id[h],relation2id[r],scg2id[t]))
-            elif ((h in scg2id) &  (t in kgg)):
-                scg_kgg_triples.append((scg2id[h],relation2id[r],kgg2id[t]))
-            elif ((h in kgg) &  (t in scg2id)):
-                kgg_scg_triples.append((kgg2id[h],relation2id[r],scg2id[t]))   
-        return(kgg_kgg_triples, scg_scg_triples, scg_kgg_triples, kgg_scg_triples,kgg2id,relation2id,scg2id)
-            
-    
-    
+                scg_scg_triples.append((scg2id[h], relation2id[r], scg2id[t]))
+            elif ((h in scg2id) & (t in kgg)):
+                scg_kgg_triples.append((scg2id[h], relation2id[r], kgg2id[t]))
+            elif ((h in kgg) & (t in scg2id)):
+                kgg_scg_triples.append((kgg2id[h], relation2id[r], scg2id[t]))
+        return (kgg_kgg_triples, scg_scg_triples, scg_kgg_triples, kgg_scg_triples, kgg2id, relation2id, scg2id)
+
     def kgg_kgg_dataloader(self):
         kgg_kgg_dataloader_head = DataLoader(
-            KGEDataset(self.kgg_kgg_triples,  negative_sample_size = self.negative_sample_size,
-                        mode = 'head-batch', nentity = len(self.kgg2id)), 
+            KGEDataset(self.kgg_kgg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='head-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
         kgg_kgg_dataloader_tail = DataLoader(
-            KGEDataset(self.kgg_kgg_triples,  negative_sample_size = self.negative_sample_size, 
-                        mode = 'tail-batch',nentity = len(self.kgg2id)), 
+            KGEDataset(self.kgg_kgg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='tail-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
         kgg_kgg_iter = BidirectionalOneShotIterator(kgg_kgg_dataloader_head, kgg_kgg_dataloader_tail)
-        return(kgg_kgg_iter)
-    
+        return (kgg_kgg_iter)
+
     def scg_scg_dataloader(self):
         scg_scg_dataloader_head = DataLoader(
-            KGEDataset(self.scg_scg_triples,  negative_sample_size = self.negative_sample_size,
-                        mode = 'head-batch', nentity = len(self.scg2id)), 
+            KGEDataset(self.scg_scg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='head-batch', nentity=len(self.scg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
         scg_scg_dataloader_tail = DataLoader(
-            KGEDataset(self.scg_scg_triples,  negative_sample_size = self.negative_sample_size,
-                        mode = 'tail-batch', nentity = len(self.scg2id)), 
+            KGEDataset(self.scg_scg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='tail-batch', nentity=len(self.scg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
         scg_scg_iter = BidirectionalOneShotIterator(scg_scg_dataloader_head, scg_scg_dataloader_tail)
-        return(scg_scg_iter)
-    
+        return (scg_scg_iter)
+
     def kgg_scg_dataloader(self):
-    
         kgg_scg_dataloader_head = DataLoader(
-            KGEDataset(self.kgg_scg_triples,  negative_sample_size = self.negative_sample_size,
-                        mode = 'head-batch', nentity = len(self.kgg2id)), 
+            KGEDataset(self.kgg_scg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='head-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
-        kgg_scg_iter =BidirectionalOneShotIterator.one_shot_iterator(kgg_scg_dataloader_head)
-        return(kgg_scg_iter)
+        kgg_scg_iter = BidirectionalOneShotIterator.one_shot_iterator(kgg_scg_dataloader_head)
+        return (kgg_scg_iter)
 
     def scg_kgg_dataloader(self):
-    
         scg_kgg_dataloader_tail = DataLoader(
-            KGEDataset(self.scg_kgg_triples,  negative_sample_size = self.negative_sample_size,
-                        mode = 'tail-batch', nentity = len(self.kgg2id)), 
+            KGEDataset(self.scg_kgg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='tail-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
             # batch_size = len(go_go_triples),
-            shuffle=True, 
+            shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
-        scg_kgg_iter =BidirectionalOneShotIterator.one_shot_iterator(scg_kgg_dataloader_tail)
-        return(scg_kgg_iter)
-
-
-
-
-
+        scg_kgg_iter = BidirectionalOneShotIterator.one_shot_iterator(scg_kgg_dataloader_tail)
+        return (scg_kgg_iter)

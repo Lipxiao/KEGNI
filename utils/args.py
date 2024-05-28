@@ -1,7 +1,6 @@
 import argparse
 
 
-
 def parser_args():
     parser = argparse.ArgumentParser(description='Argument Parser')
     # Create argument groups
@@ -11,29 +10,28 @@ def parser_args():
 
     main_group.add_argument("--max_steps", type=int,  default=5)
     # main_group.add_argument("--seeds", type=int, nargs="+", default=[0])
-    main_group.add_argument('--device', type = int,default=0)
+    main_group.add_argument('--device', type=int, default=0)
     main_group.add_argument("--load_processed", action="store_true", default=False)
     main_group.add_argument("--save_processed", action="store_true", default=True)
-    main_group.add_argument('--input', '-i',type = str,default='mHSC-E_exp.csv', help='prefix of dataset ')
+    main_group.add_argument('--input', '-i', type=str, default='mHSC-E_exp.csv', help='prefix of dataset ')
     # main_group.add_argument('--inFile','-i', type = str,default='', help='datafile')
-    main_group.add_argument('--eval','-e', action="store_true", default=False, help='evaluate')
-    main_group.add_argument('--checkpoint','-c', type = str, default='', help='load checkpoint for training') 
-    main_group.add_argument('--norm','-p', type = int, default='2', help='norm for pred construction')
+    main_group.add_argument('--eval', '-e', action="store_true", default=False, help='evaluate')
+    main_group.add_argument('--checkpoint', '-c', type=str, default='', help='load checkpoint for training')
+    main_group.add_argument('--norm', '-p', type=int, default='2', help='norm for pred construction')
 
-
-    mae_group.add_argument("--num_hidden", type=int, default=256,help="number of hidden units")
+    mae_group.add_argument("--num_hidden", type=int, default=256, help="number of hidden units")
     # mae_group.add_argument('--outFile', '-o',type = str,default='hHep',help='prefix of outfile')
-    mae_group.add_argument('--species', type = str,default='hs',help='mm or hs ')
-    mae_group.add_argument('--n_neighbors','-n', type = int,default= 30,help='n_neighbors for knn')
+    mae_group.add_argument('--species', type=str, default='hs', help='mm or hs ')
+    mae_group.add_argument('--n_neighbors', '-n', type=int, default=30, help='n_neighbors for knn')
     mae_group.add_argument("--num_heads", type=int, default=4, help="number of hidden attention heads")
-    mae_group.add_argument("--num_out_heads", type=int, default=1,help="number of output attention heads")
+    mae_group.add_argument("--num_out_heads", type=int, default=1, help="number of output attention heads")
     mae_group.add_argument("--num_layers", type=int, default=2, help="number of hidden layers")
     mae_group.add_argument("--residual", action="store_true", default=False, help="use residual connection")
     mae_group.add_argument("--in_drop", type=float, default=.2, help="input feature dropout")
-    mae_group.add_argument("--attn_drop", type=float, default=.1,help="attention dropout")
+    mae_group.add_argument("--attn_drop", type=float, default=.1, help="attention dropout")
     # mae_group.add_argument("--norm", type=str, default=None)
     mae_group.add_argument("--mae_lr", type=float, default=1e-3,  help="learning rate")
-    mae_group.add_argument("--mae_weight_decay", type=float, default=5e-4,help="weight decay")
+    mae_group.add_argument("--mae_weight_decay", type=float, default=5e-4, help="weight decay")
     mae_group.add_argument("--negative_slope", type=float, default=0.2, help="the negative slope of leaky relu for GAT")
     mae_group.add_argument("--activation", type=str, default="prelu")
     mae_group.add_argument("--mask_rate", type=float, default=0.3)

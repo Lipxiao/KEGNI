@@ -32,7 +32,7 @@ class GIN(nn.Module):
         last_activation = create_activation(activation) if encoding else None
         last_residual = encoding and residual
         last_norm = norm if encoding else None
-        
+
         if num_layers == 1:
             apply_func = MLP(2, in_dim, num_hidden, out_dim, activation=activation, norm=norm)
             if last_norm:
@@ -41,19 +41,19 @@ class GIN(nn.Module):
         else:
             # input projection (no residual)
             self.layers.append(GINConv(
-                in_dim, 
-                num_hidden, 
-                ApplyNodeFunc(MLP(2, in_dim, num_hidden, num_hidden, activation=activation, norm=norm), activation=activation, norm=norm), 
+                in_dim,
+                num_hidden,
+                ApplyNodeFunc(MLP(2, in_dim, num_hidden, num_hidden, activation=activation, norm=norm), activation=activation, norm=norm),
                 init_eps=0,
                 learn_eps=learn_eps,
                 residual=residual)
-                )
+            )
             # hidden layers
             for l in range(1, num_layers - 1):
                 # due to multi-head, the in_dim = num_hidden * num_heads
                 self.layers.append(GINConv(
-                    num_hidden, num_hidden, 
-                    ApplyNodeFunc(MLP(2, num_hidden, num_hidden, num_hidden, activation=activation, norm=norm), activation=activation, norm=norm), 
+                    num_hidden, num_hidden,
+                    ApplyNodeFunc(MLP(2, num_hidden, num_hidden, num_hidden, activation=activation, norm=norm), activation=activation, norm=norm),
                     init_eps=0,
                     learn_eps=learn_eps,
                     residual=residual)
@@ -108,7 +108,7 @@ class GINConv(nn.Module):
             self._reducer = fn.mean
         else:
             raise KeyError('Aggregator type {} not recognized.'.format(aggregator_type))
-            
+
         if learn_eps:
             self.eps = torch.nn.Parameter(torch.FloatTensor([init_eps]))
         else:
@@ -144,6 +144,7 @@ class GINConv(nn.Module):
 
 class ApplyNodeFunc(nn.Module):
     """Update the node feature hv with MLP, BN and ReLU."""
+
     def __init__(self, mlp, norm="batchnorm", activation="relu"):
         super(ApplyNodeFunc, self).__init__()
         self.mlp = mlp
@@ -163,6 +164,7 @@ class ApplyNodeFunc(nn.Module):
 
 class MLP(nn.Module):
     """MLP with linear output"""
+
     def __init__(self, num_layers, input_dim, hidden_dim, output_dim, activation="relu", norm="batchnorm"):
         super(MLP, self).__init__()
         self.linear_or_not = True  # default is linear model

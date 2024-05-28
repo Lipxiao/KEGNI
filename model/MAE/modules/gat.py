@@ -36,12 +36,12 @@ class GAT(nn.Module):
         last_activation = create_activation(activation) if encoding else None
         last_residual = (encoding and residual)
         last_norm = norm if encoding else None
-        
+
         if num_layers == 1:
             self.gat_layers.append(GATConv(
                 in_dim, out_dim, nhead_out,
                 # feat_drop, attn_drop, negative_slope, last_residual, norm=last_norm, concat_out=concat_out))
-                feat_drop, attn_drop, negative_slope, last_residual, create_activation(activation),norm=last_norm, concat_out=concat_out))
+                feat_drop, attn_drop, negative_slope, last_residual, create_activation(activation), norm=last_norm, concat_out=concat_out))
 
         else:
             # input projection (no residual)
@@ -68,7 +68,7 @@ class GAT(nn.Module):
         #         self.norms.append(norm(num_hidden * nhead))
         # else:
         #     self.norms = None
-    
+
         self.head = nn.Identity()
 
     # def forward(self, g, inputs):
@@ -87,7 +87,7 @@ class GAT(nn.Module):
     #     else:
     #         out = h.mean(1)
     #     return self.head(out)
-    
+
     def forward(self, g, inputs, return_hidden=False):
         h = inputs
         hidden_list = []
@@ -103,7 +103,6 @@ class GAT(nn.Module):
 
     def reset_classifier(self, num_classes):
         self.head = nn.Linear(self.num_heads * self.out_dim, num_classes)
-
 
 
 class GATConv(nn.Module):
@@ -158,7 +157,7 @@ class GATConv(nn.Module):
         #     self.norm = norm(num_heads * out_feats)
         # else:
         #     self.norm = None
-    
+
         self.norm = norm
         if norm is not None:
             self.norm = norm(num_heads * out_feats)
@@ -187,9 +186,7 @@ class GATConv(nn.Module):
             nn.init.constant_(self.bias, 0)
         if isinstance(self.res_fc, nn.Linear):
             nn.init.xavier_normal_(self.res_fc.weight, gain=gain)
-        
-        
-        
+
         # gain = nn.init.calculate_gain('relu')
         # if hasattr(self, 'fc'):
         #     nn.init.xavier_uniform_(self.fc.weight, gain=gain)
@@ -203,8 +200,6 @@ class GATConv(nn.Module):
         # if isinstance(self.res_fc, nn.Linear):
         #     nn.init.xavier_uniform_(self.res_fc.weight, gain=gain)
 
-
-
     def set_allow_zero_in_degree(self, set_value):
         self._allow_zero_in_degree = set_value
 
@@ -213,14 +208,14 @@ class GATConv(nn.Module):
             if not self._allow_zero_in_degree:
                 if (graph.in_degrees() == 0).any():
                     raise RuntimeError('There are 0-in-degree nodes in the graph, '
-                                   'output for those nodes will be invalid. '
-                                   'This is harmful for some applications, '
-                                   'causing silent performance regression. '
-                                   'Adding self-loop on the input graph by '
-                                   'calling `g = dgl.add_self_loop(g)` will resolve '
-                                   'the issue. Setting ``allow_zero_in_degree`` '
-                                   'to be `True` when constructing this module will '
-                                   'suppress the check and let the code run.')
+                                       'output for those nodes will be invalid. '
+                                       'This is harmful for some applications, '
+                                       'causing silent performance regression. '
+                                       'Adding self-loop on the input graph by '
+                                       'calling `g = dgl.add_self_loop(g)` will resolve '
+                                       'the issue. Setting ``allow_zero_in_degree`` '
+                                       'to be `True` when constructing this module will '
+                                       'suppress the check and let the code run.')
 
             if isinstance(feat, tuple):
                 src_prefix_shape = feat[0].shape[:-1]

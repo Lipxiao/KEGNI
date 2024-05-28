@@ -2,7 +2,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import dgl
 import dgl.function as fn
 from dgl.utils import expand_as_pair
 
@@ -31,7 +30,7 @@ class GCN(nn.Module):
         last_activation = create_activation(activation) if encoding else None
         last_residual = encoding and residual
         last_norm = norm if encoding else None
-        
+
         if num_layers == 1:
             self.gcn_layers.append(GraphConv(
                 in_dim, out_dim, residual=last_residual, norm=last_norm, activation=last_activation))
@@ -112,7 +111,7 @@ class GraphConv(nn.Module):
         #     self.norm = nn.LayerNorm(out_dim)
         # else:
         #     self.norm = None
-        
+
         self.norm = norm
         if norm is not None:
             self.norm = norm(out_dim)
@@ -152,7 +151,7 @@ class GraphConv(nn.Module):
             graph.srcdata['h'] = feat_src
             graph.update_all(aggregate_fn, fn.sum(msg='m', out='h'))
             rst = graph.dstdata['h']
-            
+
             rst = self.fc(rst)
 
             # if self._norm in ['right', 'both']:

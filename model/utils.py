@@ -1,7 +1,5 @@
-import os
-import argparse
+
 import random
-import yaml
 import logging
 from functools import partial
 import numpy as np
@@ -11,7 +9,6 @@ import dgl
 import torch
 import torch.nn as nn
 from torch import optim as optim
-from tensorboardX import SummaryWriter
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
@@ -36,6 +33,7 @@ def set_random_seed(seed):
 def get_current_lr(optimizer):
     return optimizer.state_dict()["param_groups"][0]["lr"]
 
+
 def create_activation(name):
     if name == "relu":
         return nn.ReLU()
@@ -49,6 +47,7 @@ def create_activation(name):
         return nn.ELU()
     else:
         raise NotImplementedError(f"{name} is not implemented.")
+
 
 def create_norm(name):
     if name == "layernorm":
@@ -118,6 +117,7 @@ def drop_edge(graph, drop_rate, return_edges=False):
         return ng, (dsrc, ddst)
     return ng
 
+
 class NormLayer(nn.Module):
     def __init__(self, hidden_dim, norm_type):
         super().__init__()
@@ -133,7 +133,7 @@ class NormLayer(nn.Module):
             self.mean_scale = nn.Parameter(torch.ones(hidden_dim))
         else:
             raise NotImplementedError
-        
+
     def forward(self, graph, x):
         tensor = x
         if self.norm is not None and type(self.norm) != str:

@@ -1,40 +1,30 @@
-from posixpath import join
-from sys import path
+
 import torch
 import numpy as np
-from typing import Dict, List, Optional, Tuple, Union
-from torch.utils.data import Dataset
 import pandas as pd
-from torch_cluster import knn
 import dgl
-import random
-import scanpy as sc
-from utils import parser_args
-import os 
-import math
-from scipy.stats import spearmanr
+import os
+
 
 class MAEDataset():
-
     def __init__(
-        self,
-        input:str,
-        n_neighbors:int = 30):
-        
+            self,
+            input: str,
+            n_neighbors: int = 30):
         if os.path.exists(input):
-            matrix = pd.read_csv(input, index_col = 0, header = 0)
+            matrix = pd.read_csv(input, index_col=0, header=0)
         elif os.path.exists('./data/inputs/' + input):
-            input = './data/inputs/' +input
-            matrix = pd.read_csv(input, index_col = 0, header = 0)
-            
-        self.graph,self.node2id = self.matrix_to_graph(matrix,n_neighbors)
+            input = './data/inputs/' + input
+            matrix = pd.read_csv(input, index_col=0, header=0)
+
+        self.graph, self.node2id = self.matrix_to_graph(matrix, n_neighbors)
         self.num_features = self.graph.ndata["feat"].shape[1]
 
     @staticmethod
-    def matrix_to_graph(matrix,n_neighbors):    
+    def matrix_to_graph(matrix, n_neighbors):
         matrix.index = matrix.index.str.upper()
-        genes  = list(matrix.index)
-        node2id = dict(zip(genes, range(0,len(genes))))
+        genes = list(matrix.index)
+        node2id = dict(zip(genes, range(0, len(genes))))
         matrix = matrix.values
         features = matrix
         features = torch.tensor(features)
@@ -50,30 +40,28 @@ class MAEDataset():
             return dist_matrix
 
         dist_matrix = dist(matrix)
-        threshold = np.percentile(dist_matrix, 100)    
-        nearest_indices = np.argsort(dist_matrix)[:, :(n_neighbors + 1 )]
+        threshold = np.percentile(dist_matrix, 100)
+        nearest_indices = np.argsort(dist_matrix)[:, :(n_neighbors + 1)]
         index_0 = []
         index_1 = []
-        for i in range(dist_matrix.shape[0]): 
-            index1 = nearest_indices[i][dist_matrix[i,nearest_indices[i,]] < threshold]
-            if len(index1) ==0:
-                index1 = np.append(index1,i)
-            index_0 += ([i]* len(index1))
+        for i in range(dist_matrix.shape[0]):
+            index1 = nearest_indices[i][dist_matrix[i, nearest_indices[i,]] < threshold]
+            if len(index1) == 0:
+                index1 = np.append(index1, i)
+            index_0 += ([i] * len(index1))
             index_1 += (index1.tolist())
-        
-        edge_index = torch.tensor([index_0,index_1])
-        graph = dgl.graph((edge_index[0],edge_index[1]))
+
+        edge_index = torch.tensor([index_0, index_1])
+        graph = dgl.graph((edge_index[0], edge_index[1]))
 
         graph.ndata['feat'] = features.to(dtype=torch.float32)
         graph = graph.remove_self_loop()
         graph = graph.add_self_loop()
 
-        return(graph,node2id)
+        return (graph, node2id)
 
-        
     def __getitem__(self, idx):
         return self.graph
-        
+
     def __len__(self):
         return 1
-

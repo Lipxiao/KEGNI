@@ -1,19 +1,15 @@
+from sklearn.metrics import precision_recall_curve, roc_curve, auc, roc_auc_score, average_precision_score
+import torch
+from itertools import product, permutations, combinations, combinations_with_replacement
 import pandas as pd
 import numpy as np
 import seaborn as sns
-from pathlib import Path
-import matplotlib.pyplot as plt
 import seaborn as sns
-sns.set(rc={"lines.linewidth": 2}, palette  = "deep", style = "ticks")
-from sklearn.metrics import precision_recall_curve, roc_curve, auc,roc_auc_score, average_precision_score
+sns.set(rc={"lines.linewidth": 2}, palette="deep", style="ticks")
 
-from itertools import product, permutations, combinations, combinations_with_replacement
-from tqdm import tqdm
 
-import torch
-
-def computeScores(trueEdgesDF, predEdgeDF, 
-                  directed = True, selfEdges = True):
+def computeScores(trueEdgesDF, predEdgeDF,
+                  directed=True, selfEdges=True):
     '''        
     Computes precision-recall and ROC curves
     using scikit-learn for a given set of predictions in the 
@@ -35,25 +31,25 @@ def computeScores(trueEdgesDF, predEdgeDF,
             - AUROC: Area under the ROC curve
     '''
 
-    if directed:        
-        # Initialize dictionaries with all 
+    if directed:
+        # Initialize dictionaries with all
         # possible edges
         if selfEdges:
-            possibleEdges = list(product(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-                                         repeat = 2))
+            possibleEdges = list(product(np.unique(trueEdgesDF.loc[:, ['Gene1', 'Gene2']]),
+                                         repeat=2))
         else:
-            possibleEdges = list(permutations(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-                                         r = 2))
-        
+            possibleEdges = list(permutations(np.unique(trueEdgesDF.loc[:, ['Gene1', 'Gene2']]),
+                                              r=2))
+
         # Compute TrueEdgeDict Dictionary
         # 1 if edge is present in the ground-truth
         # 0 if edge is not present in the ground-truth
         value = [0] * len(possibleEdges)
-        
+
         trueEdges = list(trueEdgesDF['Gene1'] + "|" + trueEdgesDF['Gene2'])
         data = {'possibleEdges': list({'|'.join(p) for p in possibleEdges}), 'value': value}
         possibleEdgesDF = pd.DataFrame(data)
-        possibleEdgesDF.loc[(possibleEdgesDF.loc[:,'possibleEdges'].isin(trueEdges)),'value'] = 1
+        possibleEdgesDF.loc[(possibleEdgesDF.loc[:, 'possibleEdges'].isin(trueEdges)), 'value'] = 1
         TrueEdgeDict = dict(zip(possibleEdgesDF['possibleEdges'], possibleEdgesDF['value']))
 
         predEdgeDF['Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
@@ -61,11 +57,11 @@ def computeScores(trueEdgesDF, predEdgeDF,
         # data = {'possibleEdges': list({'|'.join(p) for p in possibleEdges}), 'value': value}
         possibleEdgesDF = pd.DataFrame(data)
         filter_edges = possibleEdgesDF['possibleEdges'].isin(predEdgeDF['Edges'])
-        possibleEdgesDF.loc[filter_edges,'value'] = predEdgeDF.loc[possibleEdgesDF[filter_edges]['possibleEdges'],'EdgeWeight'].values
+        possibleEdgesDF.loc[filter_edges, 'value'] = predEdgeDF.loc[possibleEdgesDF[filter_edges]['possibleEdges'], 'EdgeWeight'].values
         PredEdgeDict = dict(zip(possibleEdgesDF['possibleEdges'], possibleEdgesDF['value']))
 
-    # if directed:        
-    #     # Initialize dictionaries with all 
+    # if directed:
+    #     # Initialize dictionaries with all
     #     # possible edges
     #     if selfEdges:
     #         possibleEdges = list(product(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
@@ -73,10 +69,10 @@ def computeScores(trueEdgesDF, predEdgeDF,
     #     else:
     #         possibleEdges = list(permutations(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
     #                                      r = 2))
-        
+
     #     TrueEdgeDict = {'|'.join(p):0 for p in possibleEdges}
     #     PredEdgeDict = {'|'.join(p):0 for p in possibleEdges}
-        
+
     #     # Compute TrueEdgeDict Dictionary
     #     # 1 if edge is present in the ground-truth
     #     # 0 if edge is not present in the ground-truth
@@ -84,7 +80,7 @@ def computeScores(trueEdgesDF, predEdgeDF,
     #         if len(trueEdgesDF.loc[(trueEdgesDF['Gene1'] == key.split('|')[0]) &
     #                (trueEdgesDF['Gene2'] == key.split('|')[1])])>0:
     #                 TrueEdgeDict[key] = 1
-                
+
     #     for key in PredEdgeDict.keys():
     #         subDF = predEdgeDF.loc[(predEdgeDF['Gene1'] == key.split('|')[0]) &
     #                            (predEdgeDF['Gene2'] == key.split('|')[1])]
@@ -92,17 +88,17 @@ def computeScores(trueEdgesDF, predEdgeDF,
     #             PredEdgeDict[key] = np.abs(subDF.EdgeWeight.values[0])
 
     else:
-        
-        # Initialize dictionaries with all 
+
+        # Initialize dictionaries with all
         # possible edges
         if selfEdges:
-            possibleEdges = list(combinations_with_replacement(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-                                                               r = 2))
+            possibleEdges = list(combinations_with_replacement(np.unique(trueEdgesDF.loc[:, ['Gene1', 'Gene2']]),
+                                                               r=2))
         else:
-            possibleEdges = list(combinations(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-                                                               r = 2))
-        TrueEdgeDict = {'|'.join(p):0 for p in possibleEdges}
-        PredEdgeDict = {'|'.join(p):0 for p in possibleEdges}
+            possibleEdges = list(combinations(np.unique(trueEdgesDF.loc[:, ['Gene1', 'Gene2']]),
+                                              r=2))
+        TrueEdgeDict = {'|'.join(p): 0 for p in possibleEdges}
+        PredEdgeDict = {'|'.join(p): 0 for p in possibleEdges}
 
         # Compute TrueEdgeDict Dictionary
         # 1 if edge is present in the ground-truth
@@ -110,26 +106,26 @@ def computeScores(trueEdgesDF, predEdgeDF,
 
         for key in TrueEdgeDict.keys():
             if len(trueEdgesDF.loc[((trueEdgesDF['Gene1'] == key.split('|')[0]) &
-                           (trueEdgesDF['Gene2'] == key.split('|')[1])) |
-                              ((trueEdgesDF['Gene2'] == key.split('|')[0]) &
-                           (trueEdgesDF['Gene1'] == key.split('|')[1]))]) > 0:
-                TrueEdgeDict[key] = 1  
+                                    (trueEdgesDF['Gene2'] == key.split('|')[1])) |
+                                   ((trueEdgesDF['Gene2'] == key.split('|')[0]) &
+                                    (trueEdgesDF['Gene1'] == key.split('|')[1]))]) > 0:
+                TrueEdgeDict[key] = 1
 
         # Compute PredEdgeDict Dictionary
         # from predEdgeDF
 
         for key in PredEdgeDict.keys():
             subDF = predEdgeDF.loc[((predEdgeDF['Gene1'] == key.split('|')[0]) &
-                               (predEdgeDF['Gene2'] == key.split('|')[1])) |
-                              ((predEdgeDF['Gene2'] == key.split('|')[0]) &
-                               (predEdgeDF['Gene1'] == key.split('|')[1]))]
-            if len(subDF)>0:
+                                    (predEdgeDF['Gene2'] == key.split('|')[1])) |
+                                   ((predEdgeDF['Gene2'] == key.split('|')[0]) &
+                                    (predEdgeDF['Gene1'] == key.split('|')[1]))]
+            if len(subDF) > 0:
                 PredEdgeDict[key] = max(np.abs(subDF.EdgeWeight.values))
-        
+
     # outDF = pd.DataFrame([TrueEdgeDict,PredEdgeDict]).T
     # outDF.columns = ['TrueEdges','PredEdges']
     # prroc = importr('PRROC')
-    # prCurve = prroc.pr_curve(scores_class0 = FloatVector(list(outDF['PredEdges'].values)), 
+    # prCurve = prroc.pr_curve(scores_class0 = FloatVector(list(outDF['PredEdges'].values)),
     #           weights_class0 = FloatVector(list(outDF['TrueEdges'].values)))
 
     # fpr, tpr, thresholds = roc_curve(y_true=outDF['TrueEdges'],
@@ -137,24 +133,22 @@ def computeScores(trueEdgesDF, predEdgeDF,
 
     # prec, recall, thresholds = precision_recall_curve(y_true=outDF['TrueEdges'],
     #                                                   probas_pred=outDF['PredEdges'], pos_label=1)
-    
+
     # return prec, recall, fpr, tpr, prCurve[2][0], auc(fpr, tpr)
 
+    outDF = pd.DataFrame([TrueEdgeDict, PredEdgeDict]).T
+    outDF.columns = ['TrueEdges', 'PredEdges']
 
-    outDF = pd.DataFrame([TrueEdgeDict,PredEdgeDict]).T
-    outDF.columns = ['TrueEdges','PredEdges']
-    
     fpr, tpr, thresholds = roc_curve(y_true=outDF['TrueEdges'],
                                      y_score=outDF['PredEdges'], pos_label=1)
 
     prec, recall, thresholds = precision_recall_curve(y_true=outDF['TrueEdges'],
                                                       probas_pred=outDF['PredEdges'], pos_label=1)
-    
+
     return prec, recall, fpr, tpr, auc(recall, prec), auc(fpr, tpr)
 
 
-
-def EarlyPrec(trueEdgesDF,predEdgeDF):
+def EarlyPrec(trueEdgesDF, predEdgeDF):
 
     predEdgeDF['Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
     # limit the predicted edges to the genes that are in the ground truth
@@ -164,20 +158,20 @@ def EarlyPrec(trueEdgesDF,predEdgeDF):
     # Consider only edges going out of TFs
 
     trueEdgesDF = trueEdgesDF.loc[(trueEdgesDF['Gene1'] != trueEdgesDF['Gene2'])]
-    trueEdgesDF.drop_duplicates(keep = 'first', inplace=True)
+    trueEdgesDF.drop_duplicates(keep='first', inplace=True)
     trueEdgesDF.reset_index(drop=True, inplace=True)
 
-    uniqueNodes = np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']])
-    possibleEdges_TF = set(product(set(trueEdgesDF.Gene1),set(uniqueNodes)))
+    uniqueNodes = np.unique(trueEdgesDF.loc[:, ['Gene1', 'Gene2']])
+    possibleEdges_TF = set(product(set(trueEdgesDF.Gene1), set(uniqueNodes)))
 
-    # Get a list of all possible interactions 
-    possibleEdges_noSelf = set(permutations(uniqueNodes, r = 2))
-    
+    # Get a list of all possible interactions
+    possibleEdges_noSelf = set(permutations(uniqueNodes, r=2))
+
     # Find intersection of above lists to ignore self edges
     # TODO: is there a better way of doing this?
     possibleEdges = possibleEdges_TF.intersection(possibleEdges_noSelf)
-    
-    TrueEdgeDict = {'|'.join(p):0 for p in possibleEdges}
+
+    TrueEdgeDict = {'|'.join(p): 0 for p in possibleEdges}
 
     trueEdges = trueEdgesDF['Gene1'] + "|" + trueEdgesDF['Gene2']
     trueEdges = trueEdges[trueEdges.isin(TrueEdgeDict)]
@@ -203,8 +197,8 @@ def EarlyPrec(trueEdgesDF,predEdgeDF):
 
     return Eprec
 
-def get_scores(edges_pos, edges_neg, adj_rec):
 
+def get_scores(edges_pos, edges_neg, adj_rec):
 
     # Predict on test set of edges
     preds = []
@@ -228,10 +222,10 @@ def get_scores(edges_pos, edges_neg, adj_rec):
     roc_score = roc_auc_score(labels_all, preds_all)
     ap_score = average_precision_score(labels_all, preds_all)
 
-    return roc_score, ap_score,preds_all,labels_all
+    return roc_score, ap_score, preds_all, labels_all
 
 
-def get_acc(adj_label,adj_rec):
+def get_acc(adj_label, adj_rec):
     data_adj = torch.zeros((adj_rec.shape[0], adj_rec.shape[0]), dtype=torch.float32)
     data_adj[adj_label['source_node_id'].values, adj_label['target_node_id'].values] = 1.0
     labels_all = data_adj.view(-1).long()

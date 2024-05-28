@@ -33,7 +33,8 @@ class MAEloss:
     Args:
         mlm_lambda: hyper-parameters to control the effect of MLM loss.
     """
-    def __init__(self,args):
+
+    def __init__(self, args):
         self.args = args
         self.linear = nn.Linear(args.num_hidden, args.num_hidden)
 
@@ -42,7 +43,7 @@ class MAEloss:
         model,
         protein_seq_inputs
     ):
-        
+
         if self.args.device < 0:
             device = "cpu"
         else:
@@ -55,4 +56,4 @@ class MAEloss:
         # z = embed
         z = self.linear.to(device)(embed)
 
-        return loss ,z
+        return loss, z

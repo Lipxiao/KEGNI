@@ -4,47 +4,42 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import logging
-
-import numpy as np
-
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 
 class KGEmodel(nn.Module):
-    def __init__(self,  nscg, nkgg,nrelation, num_hidden, gamma):
+    def __init__(self,  nscg, nkgg, nrelation, num_hidden, gamma):
         super(KGEmodel, self).__init__()
         self.nrelation = nrelation
         self.num_hidden = num_hidden
         self.epsilon = 2.0
         self.nscg = nscg
         self.nkgg = nkgg
-        
+
         self.gamma = nn.Parameter(
-            torch.Tensor([gamma]), 
+            torch.Tensor([gamma]),
             requires_grad=False
         )
-        
+
         self.embedding_range = nn.Parameter(
-            torch.Tensor([(self.gamma.item() + self.epsilon) / num_hidden]), 
+            torch.Tensor([(self.gamma.item() + self.epsilon) / num_hidden]),
             requires_grad=False
         )
 
         # self.relu = nn.ReLU()
         self._init_weights()
-        
+
     def _init_weights(self):
         """Initialize the weights"""
         self.kgg_embedding = nn.Parameter(torch.zeros(self.nkgg, self.entity_dim))
         nn.init.uniform_(
-            tensor=self.kgg_embedding, 
-            a=-self.embedding_range.item(), 
+            tensor=self.kgg_embedding,
+            a=-self.embedding_range.item(),
             b=self.embedding_range.item()
         )
         # nn.init.xavier_normal_(
-        #     tensor=self.go_embedding, 
+        #     tensor=self.go_embedding,
         #     gain = self.gamma.item()
         # )
         # nn.init.normal_(
@@ -53,24 +48,24 @@ class KGEmodel(nn.Module):
         #     std=1
         # )
         # nn.init.uniform_(
-        #     tensor=self.go_embedding, 
-        #     a=-0.1, 
-        #     b=0.1        
-        # )  
+        #     tensor=self.go_embedding,
+        #     a=-0.1,
+        #     b=0.1
+        # )
         self.relation_embedding = nn.Parameter(torch.zeros(self.nrelation, self.relation_dim))
         nn.init.uniform_(
-            tensor=self.relation_embedding, 
-            a=-self.embedding_range.item(), 
+            tensor=self.relation_embedding,
+            a=-self.embedding_range.item(),
             b=self.embedding_range.item()
         )
 
         # nn.init.uniform_(
-        #     tensor=self.relation_embedding,     
-        #     a=-0.1, 
+        #     tensor=self.relation_embedding,
+        #     a=-0.1,
         #     b=0.1
-        # )  
+        # )
         # nn.init.xavier_normal_(
-        #     tensor=self.relation_embedding, 
+        #     tensor=self.relation_embedding,
         #     gain = self.gamma.item()
         # )
         # nn.init.normal_(
@@ -80,8 +75,8 @@ class KGEmodel(nn.Module):
         # )
 
     def forward(self,
-                kgg_ids = None,
-                relation_ids = None):
+                kgg_ids=None,
+                relation_ids=None):
 
         kgg_embedding = None
         relation_embedding = None
@@ -89,8 +84,7 @@ class KGEmodel(nn.Module):
             # go_embed = self.go_embedding[go_ids]
             kgg_embedding = self.kgg_embedding[[int(tensor_id.item()) for tensor_id in kgg_ids]]
         if relation_ids is not None:
-            # relation_embed = self.relation_embedding[relation_ids]        
-            relation_embedding = self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]]            
-            # relation_embed = self.relu(self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]])            
-        return kgg_embedding,relation_embedding
-    
+            # relation_embed = self.relation_embedding[relation_ids]
+            relation_embedding = self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]]
+            # relation_embed = self.relu(self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]])
+        return kgg_embedding, relation_embedding
