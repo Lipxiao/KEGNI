@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import collections
-from model.models import E2EModel
+from model.models import KEGNI
 
 
 class KGEloss:
@@ -14,7 +14,7 @@ class KGEloss:
 
     def __call__(
         self,
-        model: E2EModel,
+        model: KEGNI,
         embedding=None,
         kgg_kgg_inputs=None,
         scg_kgg_inputs=None,
@@ -31,8 +31,8 @@ class KGEloss:
             'pRotatE': self.pRotatE
         }
 
-        self.gamma = model.kg_model.gamma
-        self.embedding_range = model.kg_model.embedding_range
+        self.gamma = model.kge_model.gamma
+        self.embedding_range = model.kge_model.embedding_range
         # self.gamma = self.kge_args.gamma
 
         if self.args.model not in model_func:

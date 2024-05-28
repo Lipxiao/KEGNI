@@ -1,6 +1,6 @@
 import os
 import logging
-from model import E2EModel
+from model import KEGNI
 from dataloader import KGEdataloader
 from train import Trainer
 from dataset import MAEDataset
@@ -32,7 +32,7 @@ def set_seed(seed):
 
 
 def main():
-    set_seed(0)
+    set_seed(42)
     args = parser_args()
 
     prefix, _ = os.path.splitext(os.path.basename(args.input))
@@ -52,15 +52,16 @@ def main():
 
     sc_dataset = MAEDataset(input=args.input, n_neighbors=args.n_neighbors)
 
-    kge_file = args.data_path
-    kge_data = pd.read_csv(kge_file, sep='\t', header=None)
+    kge_dataloader = KGEdataloader(**args, sc_dataset=sc_dataset)
+    kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()
+    scg_scg_iter = kge_dataloader.scg_scg_dataloader()
+    scg_kgg_iter = kge_dataloader.scg_kgg_dataloader()
+    kgg_scg_iter = kge_dataloader.kgg_scg_dataloader()
 
-    KGE_dataloader = KGEdataloader(**args, kge_data=kge_data, sc_dataset=sc_dataset)
-    kgg_kgg_iter, scg_scg_iter, scg_kgg_iter, kgg_scg_iter = KGE_dataloader.kgg_kgg_iter, KGE_dataloader.scg_scg_iter, KGE_dataloader.scg_kgg_iter, KGE_dataloader.kgg_scg_iter
-    kgg2id, relation2id, scg2id = KGE_dataloader.kgg2id, KGE_dataloader.relation2id, KGE_dataloader.scg2id
-
-    model = E2EModel(**args, num_features=sc_dataset.num_features,
-                     kgg2id=kgg2id, relation2id=relation2id, scg2id=scg2id)
+    model = KEGNI(**args, num_features=sc_dataset.num_features,
+                  kgg2id=kge_dataloader.kgg2id,
+                  relation2id=kge_dataloader.relation2id,
+                  scg2id=kge_dataloader.scg2id)
 
     trainer = Trainer(
         args=args,

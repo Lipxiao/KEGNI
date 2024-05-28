@@ -5,6 +5,7 @@ from __future__ import print_function
 from dataset import KGEDataset
 from torch.utils.data import DataLoader
 import datetime
+import pandas as pd
 
 current_time = datetime.datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
@@ -38,37 +39,36 @@ class BidirectionalOneShotIterator(object):
 
 class KGEdataloader():
     def __init__(self, **kwargs):
-        kge_data = kwargs.get("kge_data")
         sc_dataset = kwargs.get("sc_dataset")
         self.negative_sample_size = kwargs.get("negative_sample_size")
         self.batch_size = kwargs.get("batch_size")
-        self.kgg_kgg_triples, self.scg_scg_triples, self.scg_kgg_triples, self.kgg_scg_triples, self.kgg2id, self.relation2id, self.scg2id = self.data_process(kge_data, sc_dataset)
+        kge_file_path = kwargs.get("data_path")
+        kge_data = pd.read_csv(kge_file_path, sep='\t', header=None)
+        self.data_process(kge_data, sc_dataset)
 
-    @staticmethod
-    def data_process(kge_data, sc_dataset):
+    def data_process(self, kge_data, sc_dataset):
         kge_data[0] = kge_data[0].str.upper()
         kge_data[2] = kge_data[2].str.upper()
         kgg = (set(kge_data[0].tolist() + kge_data[2].tolist()))-set(sc_dataset.node2id.keys())
 
-        kgg2id = {string: index for index, string in enumerate(sorted(list(kgg)))}
-        relation2id = {string: index for index, string in enumerate(sorted(list(set(kge_data[1]))))}
-        scg2id = sc_dataset.node2id
-        kgg_kgg_triples = []
-        scg_scg_triples = []
-        scg_kgg_triples = []
-        kgg_scg_triples = []
+        self.kgg2id = {string: index for index, string in enumerate(sorted(list(kgg)))}
+        self.relation2id = {string: index for index, string in enumerate(sorted(list(set(kge_data[1]))))}
+        self.scg2id = sc_dataset.node2id
+        self.kgg_kgg_triples = []
+        self.scg_scg_triples = []
+        self.scg_kgg_triples = []
+        self.kgg_scg_triples = []
 
         for index, row in kge_data.iterrows():
             h, r, t = row[0], row[1], row[2]
             if ((h in kgg) & (t in kgg)):
-                kgg_kgg_triples.append((kgg2id[h], relation2id[r], kgg2id[t]))
-            elif (h in scg2id) & (t in scg2id):
-                scg_scg_triples.append((scg2id[h], relation2id[r], scg2id[t]))
-            elif ((h in scg2id) & (t in kgg)):
-                scg_kgg_triples.append((scg2id[h], relation2id[r], kgg2id[t]))
-            elif ((h in kgg) & (t in scg2id)):
-                kgg_scg_triples.append((kgg2id[h], relation2id[r], scg2id[t]))
-        return (kgg_kgg_triples, scg_scg_triples, scg_kgg_triples, kgg_scg_triples, kgg2id, relation2id, scg2id)
+                self.kgg_kgg_triples.append((self.kgg2id[h], self.relation2id[r], self.kgg2id[t]))
+            elif (h in self.scg2id) & (t in self.scg2id):
+                self.scg_scg_triples.append((self.scg2id[h], self.relation2id[r], self.scg2id[t]))
+            elif ((h in self.scg2id) & (t in kgg)):
+                self.scg_kgg_triples.append((self.scg2id[h], self.relation2id[r], self.kgg2id[t]))
+            elif ((h in kgg) & (t in self.scg2id)):
+                self.kgg_scg_triples.append((self.kgg2id[h], self.relation2id[r], self.scg2id[t]))
 
     def kgg_kgg_dataloader(self):
         kgg_kgg_dataloader_head = DataLoader(
@@ -88,7 +88,7 @@ class KGEdataloader():
             collate_fn=KGEDataset.collate_fn
         )
         kgg_kgg_iter = BidirectionalOneShotIterator(kgg_kgg_dataloader_head, kgg_kgg_dataloader_tail)
-        return (kgg_kgg_iter)
+        return kgg_kgg_iter
 
     def scg_scg_dataloader(self):
         scg_scg_dataloader_head = DataLoader(
@@ -108,7 +108,7 @@ class KGEdataloader():
             collate_fn=KGEDataset.collate_fn
         )
         scg_scg_iter = BidirectionalOneShotIterator(scg_scg_dataloader_head, scg_scg_dataloader_tail)
-        return (scg_scg_iter)
+        return scg_scg_iter
 
     def kgg_scg_dataloader(self):
         kgg_scg_dataloader_head = DataLoader(
@@ -120,7 +120,7 @@ class KGEdataloader():
             collate_fn=KGEDataset.collate_fn
         )
         kgg_scg_iter = BidirectionalOneShotIterator.one_shot_iterator(kgg_scg_dataloader_head)
-        return (kgg_scg_iter)
+        return kgg_scg_iter
 
     def scg_kgg_dataloader(self):
         scg_kgg_dataloader_tail = DataLoader(
@@ -132,4 +132,4 @@ class KGEdataloader():
             collate_fn=KGEDataset.collate_fn
         )
         scg_kgg_iter = BidirectionalOneShotIterator.one_shot_iterator(scg_kgg_dataloader_tail)
-        return (scg_kgg_iter)
+        return scg_kgg_iter

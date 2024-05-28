@@ -1,1 +1,1 @@
-from models import E2EModel
+from models import KEGNI

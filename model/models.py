@@ -9,7 +9,7 @@ from model.MAE.MAEmodel import MAEmodel
 logger = logging.getLogger(__name__)
 
 
-class E2EModel(nn.Module):
+class KEGNI(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
 
@@ -17,7 +17,6 @@ class E2EModel(nn.Module):
         relation2id = kwargs.get("relation2id")
         kgg2id = kwargs.get("kgg2id")
         self.device = kwargs.get("device")
-
         num_features = kwargs.get("num_features")
         num_hidden = kwargs.get("num_hidden")
         gamma = kwargs.get("gamma")
@@ -43,14 +42,15 @@ class E2EModel(nn.Module):
             self.device = "cpu"
         else:
             self.device = f"cuda:{self.device}" if torch.cuda.is_available() else "cpu"
-        self.kg_model = KGEmodel(
+        self.kge_model = KGEmodel(
             nrelation=len(relation2id),
             nscg=len(scg2id),
             nkgg=len(kgg2id),
             num_hidden=num_hidden,
             gamma=gamma)
 
-        self.mae_model = MAEmodel(in_dim=num_features, num_hidden=num_hidden,
+        self.mae_model = MAEmodel(in_dim=num_features,
+                                  num_hidden=num_hidden,
                                   num_layers=num_layers,
                                   nhead=num_heads,
                                   nhead_out=num_out_heads,
@@ -80,11 +80,11 @@ class E2EModel(nn.Module):
         relation_embedding = None
         kgg_embedding = None
 
-        kg_model = self.kg_model.to(self.device)
+        kge_model = self.kge_model.to(self.device)
 
         if scg_ids is not None:
             scg_embedding = embedding[[int(tensor_id.item()) for tensor_id in scg_ids]]
-        kgg_embedding, relation_embedding = kg_model(
+        kgg_embedding, relation_embedding = kge_model(
             kgg_ids=kgg_ids,
             relation_ids=relation_ids
         )

@@ -16,7 +16,7 @@ class KGEmodel(nn.Module):
         self.epsilon = 2.0
         self.nscg = nscg
         self.nkgg = nkgg
-
+        self.num_hidden = num_hidden
         self.gamma = nn.Parameter(
             torch.Tensor([gamma]),
             requires_grad=False
@@ -32,7 +32,7 @@ class KGEmodel(nn.Module):
 
     def _init_weights(self):
         """Initialize the weights"""
-        self.kgg_embedding = nn.Parameter(torch.zeros(self.nkgg, self.entity_dim))
+        self.kgg_embedding = nn.Parameter(torch.zeros(self.nkgg, self.num_hidden))
         nn.init.uniform_(
             tensor=self.kgg_embedding,
             a=-self.embedding_range.item(),
@@ -52,7 +52,7 @@ class KGEmodel(nn.Module):
         #     a=-0.1,
         #     b=0.1
         # )
-        self.relation_embedding = nn.Parameter(torch.zeros(self.nrelation, self.relation_dim))
+        self.relation_embedding = nn.Parameter(torch.zeros(self.nrelation, self.num_hidden))
         nn.init.uniform_(
             tensor=self.relation_embedding,
             a=-self.embedding_range.item(),

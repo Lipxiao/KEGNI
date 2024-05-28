@@ -20,8 +20,7 @@ class MAEDataset():
         self.graph, self.node2id = self.matrix_to_graph(matrix, n_neighbors)
         self.num_features = self.graph.ndata["feat"].shape[1]
 
-    @staticmethod
-    def matrix_to_graph(matrix, n_neighbors):
+    def matrix_to_graph(self, matrix, n_neighbors):
         matrix.index = matrix.index.str.upper()
         genes = list(matrix.index)
         node2id = dict(zip(genes, range(0, len(genes))))
@@ -58,7 +57,7 @@ class MAEDataset():
         graph = graph.remove_self_loop()
         graph = graph.add_self_loop()
 
-        return (graph, node2id)
+        return graph, node2id
 
     def __getitem__(self, idx):
         return self.graph

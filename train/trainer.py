@@ -339,7 +339,9 @@ class Trainer(Trainer):
     ) -> torch.Tensor:
 
         model.train()
-        loss, all_loss = self.compute_loss(model, sc_dataset_inputs=sc_dataset_inputs, kgg_kgg_inputs=kgg_kgg_inputs,
+        loss, all_loss = self.compute_loss(model,
+                                           sc_dataset_inputs=sc_dataset_inputs,
+                                           kgg_kgg_inputs=kgg_kgg_inputs,
                                            scg_kgg_inputs=scg_kgg_inputs,
                                            kgg_scg_inputs=kgg_scg_inputs,
                                            scg_scg_inputs=scg_scg_inputs)
