@@ -1,1 +1,1 @@
-from models import KEGNI
+from model.models import KEGNI

@@ -1,1 +1,1 @@
-from trainer import Trainer
+from train.trainer import Trainer

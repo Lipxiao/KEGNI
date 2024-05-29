@@ -1,2 +1,2 @@
-from kge_loss import KGEloss
-from mae_loss import MAEloss
+from loss.kge_loss import KGEloss
+from loss.mae_loss import MAEloss

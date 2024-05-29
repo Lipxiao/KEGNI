@@ -1,1 +1,1 @@
-from kge_dataloader import KGEdataloader
+from dataloader.kge_dataloader import KGEdataloader

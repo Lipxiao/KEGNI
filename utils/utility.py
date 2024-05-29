@@ -168,7 +168,6 @@ def EarlyPrec(trueEdgesDF, predEdgeDF):
     possibleEdges_noSelf = set(permutations(uniqueNodes, r=2))
 
     # Find intersection of above lists to ignore self edges
-    # TODO: is there a better way of doing this?
     possibleEdges = possibleEdges_TF.intersection(possibleEdges_noSelf)
 
     TrueEdgeDict = {'|'.join(p): 0 for p in possibleEdges}

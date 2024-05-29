@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 import collections
-from model.models import KEGNI
+# from model.models import KEGNI
 
 
 class KGEloss:
@@ -14,13 +14,12 @@ class KGEloss:
 
     def __call__(
         self,
-        model: KEGNI,
+        model,
         embedding=None,
         kgg_kgg_inputs=None,
         scg_kgg_inputs=None,
         kgg_scg_inputs=None,
         scg_scg_inputs=None,
-        **kwargs
     ):
 
         model_func = {
@@ -57,15 +56,14 @@ class KGEloss:
                 relations_ids = [list[1] for list in positive_sample]
                 head_embed, _, relation_embed = model(
                     embedding=embedding,
-                    protein_ids=head_ids,
-                    relation_ids=relations_ids,
-                )
+                    scg_ids=head_ids,
+                    relation_ids=relations_ids)
                 head_embed = head_embed.unsqueeze(1)
                 relation_embed = relation_embed.unsqueeze(1)
                 if positive_sample is not None:
                     tail_ids = [list[2] for list in positive_sample]
                     _, tail_embed, _ = model(
-                        go_ids=tail_ids
+                        kgg_ids=tail_ids
                     )
                     tail_embed = tail_embed.unsqueeze(1)
                     score = model_func[self.args.model](head=head_embed,
@@ -78,7 +76,7 @@ class KGEloss:
                 if negative_sample is not None:
                     tail_ids = negative_sample.reshape(-1)
                     _,  tail_embed, _ = model(
-                        go_ids=tail_ids
+                        kgg_ids=tail_ids
                     )
                     tail_embed = tail_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
@@ -91,18 +89,15 @@ class KGEloss:
                 tail_ids = [list[2] for list in positive_sample]
                 relations_ids = [list[1] for list in positive_sample]
                 _, tail_embed, relation_embed = model(
-                    go_ids=tail_ids,
-                    relation_ids=relations_ids,
-                    # protein_seq_inputs = protein_seq_inputs
-                )
+                    kgg_ids=tail_ids,
+                    relation_ids=relations_ids)
                 tail_embed = tail_embed.unsqueeze(1)
                 relation_embed = relation_embed.unsqueeze(1)
                 if positive_sample is not None:
                     head_ids = [list[0] for list in positive_sample]
                     head_embed, _, _ = model(
                         embedding=embedding,
-                        protein_ids=head_ids,
-                    )
+                        scg_ids=head_ids)
                     head_embed = head_embed.unsqueeze(1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -116,7 +111,7 @@ class KGEloss:
                     # tail_embed = self.onto_model.go_embedding[tail_ids].reshape(batch_size, negative_sample_size, -1)
                     head_embed, _, _ = model(
                         embedding=embedding,
-                        protein_ids=head_ids,
+                        scg_ids=head_ids,
                     )
                     head_embed = head_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
@@ -137,7 +132,7 @@ class KGEloss:
                 head_ids = [list[0] for list in positive_sample]
                 relations_ids = [list[1] for list in positive_sample]
                 _, head_embed, relation_embed = model(
-                    go_ids=head_ids,
+                    kgg_ids=head_ids,
                     relation_ids=relations_ids,
                 )
                 head_embed = head_embed.unsqueeze(1)
@@ -146,7 +141,7 @@ class KGEloss:
                     tail_ids = [list[2] for list in positive_sample]
                     tail_embed, _, _ = model(
                         embedding=embedding,
-                        protein_ids=tail_ids)
+                        scg_ids=tail_ids)
                     tail_embed = tail_embed.unsqueeze(1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -160,7 +155,7 @@ class KGEloss:
                     # tail_embed = self.onto_model.go_embedding[tail_ids].reshape(batch_size, negative_sample_size, -1)
                     tail_embed, _, _ = model(
                         embedding=embedding,
-                        protein_ids=tail_ids)
+                        scg_ids=tail_ids)
                     tail_embed = tail_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -174,7 +169,7 @@ class KGEloss:
                 relations_ids = [list[1] for list in positive_sample]
                 tail_embed, _, relation_embed = model(
                     embedding=embedding,
-                    protein_ids=tail_ids,
+                    scg_ids=tail_ids,
                     relation_ids=relations_ids,
                     # protein_seq_inputs = protein_seq_inputs
                 )
@@ -182,7 +177,7 @@ class KGEloss:
                 relation_embed = relation_embed.unsqueeze(1)
                 if positive_sample is not None:
                     head_ids = [list[0] for list in positive_sample]
-                    _, head_embed, _ = model(go_ids=head_ids,
+                    _, head_embed, _ = model(kgg_ids=head_ids,
                                              #    protein_seq_inputs = protein_seq_inputs
                                              )
                     head_embed = head_embed.unsqueeze(1)
@@ -196,7 +191,7 @@ class KGEloss:
                 if negative_sample is not None:
                     head_ids = negative_sample.reshape(-1)
                     # tail_embed = self.onto_model.go_embedding[tail_ids].reshape(batch_size, negative_sample_size, -1)
-                    _, head_embed, _ = model(go_ids=head_ids)
+                    _, head_embed, _ = model(kgg_ids=head_ids)
                     head_embed = head_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -219,7 +214,7 @@ class KGEloss:
                 relations_ids = [list[1] for list in positive_sample]
                 head_embed, _, relation_embed = model(
                     embedding=embedding,
-                    protein_ids=head_ids,
+                    scg_ids=head_ids,
                     relation_ids=relations_ids,
                     # protein_seq_inputs = protein_seq_inputs
                 )
@@ -231,7 +226,7 @@ class KGEloss:
 
                     tail_embed, _, _ = model(
                         embedding=embedding,
-                        protein_ids=tail_ids,
+                        scg_ids=tail_ids,
                         # protein_seq_inputs = protein_seq_inputs
                     )
                     tail_embed = tail_embed.unsqueeze(1)
@@ -244,7 +239,7 @@ class KGEloss:
                 if negative_sample is not None:
                     tail_ids = negative_sample.reshape(-1)
 
-                    tail_embed, _, _ = model(protein_ids=tail_ids, embedding=embedding,
+                    tail_embed, _, _ = model(scg_ids=tail_ids, embedding=embedding,
                                              #    protein_seq_inputs = protein_seq_inputs
                                              )
                     tail_embed = tail_embed.reshape(batch_size, negative_sample_size, -1)
@@ -259,7 +254,7 @@ class KGEloss:
                 relations_ids = [list[1] for list in positive_sample]
                 tail_embed, _, relation_embed = model(
                     embedding=embedding,
-                    protein_ids=tail_ids,
+                    scg_ids=tail_ids,
                     relation_ids=relations_ids,
                     # protein_seq_inputs = protein_seq_inputs
                 )
@@ -267,7 +262,7 @@ class KGEloss:
                 relation_embed = relation_embed.unsqueeze(1)
                 if positive_sample is not None:
                     head_ids = [list[0] for list in positive_sample]
-                    head_embed, _, _ = model(protein_ids=head_ids, embedding=embedding,
+                    head_embed, _, _ = model(scg_ids=head_ids, embedding=embedding,
                                              #    protein_seq_inputs = protein_seq_inputs
                                              )
                     head_embed = head_embed.unsqueeze(1)
@@ -281,7 +276,7 @@ class KGEloss:
                 if negative_sample is not None:
                     head_ids = negative_sample.reshape(-1)
                     # tail_embed = self.onto_model.go_embedding[tail_ids].reshape(batch_size, negative_sample_size, -1)
-                    head_embed, _, _ = model(protein_ids=head_ids, embedding=embedding,
+                    head_embed, _, _ = model(scg_ids=head_ids, embedding=embedding,
                                              #    protein_seq_inputs = protein_seq_inputs
                                              )
                     head_embed = head_embed.reshape(batch_size, negative_sample_size, -1)
@@ -305,14 +300,14 @@ class KGEloss:
                 head_ids = [list[0] for list in positive_sample]
                 relations_ids = [list[1] for list in positive_sample]
                 _, head_embed, relation_embed = model(
-                    go_ids=head_ids,
+                    kgg_ids=head_ids,
                     relation_ids=relations_ids,
                 )
                 head_embed = head_embed.unsqueeze(1)
                 relation_embed = relation_embed.unsqueeze(1)
                 if positive_sample is not None:
                     tail_ids = [list[2] for list in positive_sample]
-                    _, tail_embed, _ = model(go_ids=tail_ids,)
+                    _, tail_embed, _ = model(kgg_ids=tail_ids,)
                     tail_embed = tail_embed.unsqueeze(1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -323,7 +318,7 @@ class KGEloss:
                 if negative_sample is not None:
                     tail_ids = negative_sample.reshape(-1)
 
-                    _, tail_embed, _ = model(go_ids=tail_ids,)
+                    _, tail_embed, _ = model(kgg_ids=tail_ids,)
                     tail_embed = tail_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -335,7 +330,7 @@ class KGEloss:
                 tail_ids = [list[2] for list in positive_sample]
                 relation_ids = [list[1] for list in positive_sample]
                 _, tail_embed, relation_embed = model(
-                    go_ids=tail_ids,
+                    kgg_ids=tail_ids,
                     relation_ids=relation_ids,
                 )
                 tail_embed = tail_embed.unsqueeze(1)
@@ -343,7 +338,7 @@ class KGEloss:
                 if positive_sample is not None:
                     head_ids = [list[0] for list in positive_sample]
 
-                    _, head_embed, _ = model(go_ids=head_ids,)
+                    _, head_embed, _ = model(kgg_ids=head_ids,)
                     head_embed = head_embed.unsqueeze(1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,
@@ -356,7 +351,7 @@ class KGEloss:
                     head_ids = negative_sample.reshape(-1)
                     # tail_embed = self.onto_model.go_embedding[tail_ids].reshape(batch_size, negative_sample_size, -1)
 
-                    _, head_embed, _ = model(go_ids=head_ids)
+                    _, head_embed, _ = model(kgg_ids=head_ids)
                     head_embed = head_embed.reshape(batch_size, negative_sample_size, -1)
                     score = model_func[self.args.model](head=head_embed,
                                                         relation=relation_embed,

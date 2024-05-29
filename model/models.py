@@ -12,11 +12,11 @@ logger = logging.getLogger(__name__)
 class KEGNI(nn.Module):
     def __init__(self, **kwargs):
         super().__init__()
-
+        
+        self.device = kwargs.get("device")
         scg2id = kwargs.get("scg2id")
         relation2id = kwargs.get("relation2id")
         kgg2id = kwargs.get("kgg2id")
-        self.device = kwargs.get("device")
         num_features = kwargs.get("num_features")
         num_hidden = kwargs.get("num_hidden")
         gamma = kwargs.get("gamma")
@@ -28,8 +28,8 @@ class KEGNI(nn.Module):
         attn_drop = kwargs.get("attn_drop")
         negative_slope = kwargs.get("negative_slope")
         residual = kwargs.get("residual")
-        encoder_type = kwargs.get("encoder_type")
-        decoder_type = kwargs.get("decoder_type")
+        encoder_type = kwargs.get("encoder")
+        decoder_type = kwargs.get("decoder")
         mask_rate = kwargs.get("mask_rate")
         norm = kwargs.get("norm")
         loss_fn = kwargs.get("loss_fn")

@@ -22,19 +22,13 @@ class MAEDataset():
 
     def matrix_to_graph(self, matrix, n_neighbors):
         matrix.index = matrix.index.str.upper()
-        genes = list(matrix.index)
-        node2id = dict(zip(genes, range(0, len(genes))))
+        node2id = dict(zip(matrix.index, range(0, len(matrix.index))))
         matrix = matrix.values
-        features = matrix
-        features = torch.tensor(features)
+        features = torch.tensor(matrix)
 
         def dist(matrix):
-            # 计算每个点的平方和
             square_sum = np.sum(matrix**2, axis=1, keepdims=True)
-            # 计算两个点的内积
             inner_product = np.dot(matrix, matrix.T)
-            # 计算距离矩阵
-            # dist_matrix = np.sqrt(square_sum + square_sum.T - 2 * inner_product)
             dist_matrix = np.sqrt(np.maximum(square_sum + square_sum.T - 2 * inner_product, 0))
             return dist_matrix
 

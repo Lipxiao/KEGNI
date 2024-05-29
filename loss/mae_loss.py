@@ -25,14 +25,7 @@ def sig_loss(x, y):
     loss = loss.mean()
     return loss
 
-# @dataclass
 class MAEloss:
-    """
-    Loss function for MLM.
-
-    Args:
-        mlm_lambda: hyper-parameters to control the effect of MLM loss.
-    """
 
     def __init__(self, args):
         self.args = args
@@ -41,18 +34,17 @@ class MAEloss:
     def __call__(
         self,
         model,
-        protein_seq_inputs
-    ):
+        sc_dataset_inputs):
 
         if self.args.device < 0:
             device = "cpu"
         else:
             device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
 
-        graph = protein_seq_inputs
+        graph = sc_dataset_inputs
         x = graph.ndata["feat"]
-        protein_lm = model.protein_lm.to(device)
-        loss, embed = protein_lm(graph, x)
+        mae_model = model.mae_model.to(device)
+        loss, embed = mae_model(graph, x)
         # z = embed
         z = self.linear.to(device)(embed)
 

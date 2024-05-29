@@ -5,10 +5,10 @@ from functools import partial
 import torch
 import torch.nn as nn
 
-from modules.gin import GIN
-from modules.gat import GAT
-from modules.gcn import GCN
-from modules.dot_gat import DotGAT
+from model.MAE import GIN
+from model.MAE import GAT
+from model.MAE import GCN
+from model.MAE import DotGAT
 from loss.mae_loss import sce_loss
 from model.utils import create_norm, drop_edge
 

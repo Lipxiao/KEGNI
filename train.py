@@ -52,13 +52,13 @@ def main():
 
     sc_dataset = MAEDataset(input=args.input, n_neighbors=args.n_neighbors)
 
-    kge_dataloader = KGEdataloader(**args, sc_dataset=sc_dataset)
+    kge_dataloader = KGEdataloader(**vars(args), sc_dataset=sc_dataset)
     kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()
     scg_scg_iter = kge_dataloader.scg_scg_dataloader()
     scg_kgg_iter = kge_dataloader.scg_kgg_dataloader()
     kgg_scg_iter = kge_dataloader.kgg_scg_dataloader()
 
-    model = KEGNI(**args, num_features=sc_dataset.num_features,
+    model = KEGNI(**vars(args), num_features=sc_dataset.num_features,
                   kgg2id=kge_dataloader.kgg2id,
                   relation2id=kge_dataloader.relation2id,
                   scg2id=kge_dataloader.scg2id)

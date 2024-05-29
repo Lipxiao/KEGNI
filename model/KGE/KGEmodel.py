@@ -13,7 +13,7 @@ class KGEmodel(nn.Module):
         super(KGEmodel, self).__init__()
         self.nrelation = nrelation
         self.num_hidden = num_hidden
-        self.epsilon = 2.0
+        epsilon = 2.0
         self.nscg = nscg
         self.nkgg = nkgg
         self.num_hidden = num_hidden
@@ -23,7 +23,7 @@ class KGEmodel(nn.Module):
         )
 
         self.embedding_range = nn.Parameter(
-            torch.Tensor([(self.gamma.item() + self.epsilon) / num_hidden]),
+            torch.Tensor([(self.gamma.item() + epsilon) / num_hidden]),
             requires_grad=False
         )
 

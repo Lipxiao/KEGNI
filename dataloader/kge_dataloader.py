@@ -61,13 +61,13 @@ class KGEdataloader():
 
         for index, row in kge_data.iterrows():
             h, r, t = row[0], row[1], row[2]
-            if ((h in kgg) & (t in kgg)):
+            if ((h in self.kgg2id) & (t in self.kgg2id)):
                 self.kgg_kgg_triples.append((self.kgg2id[h], self.relation2id[r], self.kgg2id[t]))
             elif (h in self.scg2id) & (t in self.scg2id):
                 self.scg_scg_triples.append((self.scg2id[h], self.relation2id[r], self.scg2id[t]))
-            elif ((h in self.scg2id) & (t in kgg)):
+            elif ((h in self.scg2id) & (t in self.kgg2id)):
                 self.scg_kgg_triples.append((self.scg2id[h], self.relation2id[r], self.kgg2id[t]))
-            elif ((h in kgg) & (t in self.scg2id)):
+            elif ((h in self.kgg2id) & (t in self.scg2id)):
                 self.kgg_scg_triples.append((self.kgg2id[h], self.relation2id[r], self.scg2id[t]))
 
     def kgg_kgg_dataloader(self):

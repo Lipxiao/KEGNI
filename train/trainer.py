@@ -18,19 +18,17 @@ class Trainer(Trainer):
     def __init__(
         self,
         model: Union[nn.Module, PreTrainedModel],
-        # args,
+        args = None,
         sc_dataset_iter=None,
         kgg_kgg_iter=None,
         scg_kgg_iter=None,
         scg_scg_iter=None,
         kgg_scg_iter=None,
-        logger=None,
-        **kwargs
+        logger=None
+        # **kwargs
     ):
-        super().__init__(
-            model=model,
-            # args=args,
-        )
+        super().__init__(model=model)
+        self.args = args
         self.sc_dataset_iter = sc_dataset_iter
         self.kgg_kgg_iter = kgg_kgg_iter
         self.scg_scg_iter = scg_scg_iter
@@ -38,9 +36,7 @@ class Trainer(Trainer):
         self.kgg_scg_iter = kgg_scg_iter
 
         # self.args = parser_args()
-        self.ke_loss_fn = KGEloss(args=self.args,
-                                  # kge_args = self.kge_args
-                                  )
+        self.ke_loss_fn = KGEloss(args=self.args)
         self.mlm_loss_fn = MAEloss(args=self.args)
         self.logger = logger
 
@@ -86,8 +82,8 @@ class Trainer(Trainer):
         kgg_kgg_iter, scg_kgg_iter, scg_scg_iter, kgg_scg_iter = self.kgg_kgg_iter, self.scg_kgg_iter, self.scg_scg_iter, self.kgg_scg_iter
 
         self.optimizer = optim.Adam([
-            {'params': model.protein_lm.parameters(), 'lr': self.args.mae_lr, 'weight_decay': self.args.mae_weight_decay},
-            {'params': model.onto_model.parameters(), 'lr': self.args.kge_lr}
+            {'params': model.mae_model.parameters(), 'lr': self.args.mae_lr, 'weight_decay': self.args.mae_weight_decay},
+            {'params': model.kge_model.parameters(), 'lr': self.args.kge_lr}
         ])
 
         def lm_scheduler(step): return (1 + np.cos((step) * np.pi / max_steps)) * 0.5
@@ -102,13 +98,13 @@ class Trainer(Trainer):
         # self._globalstep_last_logged = self.state.global_step
         self.optimizer.zero_grad()
 
-        mlm_loss = []
-        protein_go_loss = []
-        protein_protein_loss = []
-        go_protein_loss = []
-        go_go_loss = []
+        mae_loss = []
+        scg_kgg_loss = []
+        scg_scg_loss = []
+        kgg_scg_loss = []
+        kgg_kgg_loss = []
         Eprec_values = {}
-
+        #TODO: 模型的保存与检查
         if self.args.checkpoint:
             checkpoint = torch.load(self.args.checkpoint)  # 加载断点
 
@@ -155,11 +151,11 @@ class Trainer(Trainer):
                                                 scg_kgg_inputs=scg_kgg_inputs,
                                                 kgg_scg_inputs=kgg_scg_inputs,
                                                 scg_scg_inputs=scg_scg_inputs)
-            mlm_loss.append(all_loss['mlm_loss'])
-            protein_go_loss.append(all_loss['protein_go_loss'])
-            go_protein_loss.append(all_loss['go_protein_loss'])
-            protein_protein_loss.append(all_loss['protein_protein_loss'])
-            go_go_loss.append(all_loss['go_go_loss'])
+            mae_loss.append(all_loss['mlm_loss'])
+            scg_kgg_loss.append(all_loss['protein_go_loss'])
+            kgg_scg_loss.append(all_loss['go_protein_loss'])
+            scg_scg_loss.append(all_loss['protein_protein_loss'])
+            kgg_kgg_loss.append(all_loss['go_go_loss'])
             tr_loss += loss.item()
             if (step + 1) % 1 == 0:
                 # print("setp:", '%04d' % (step + 1), "train_loss=", "{:.5f}".format(loss.item()))
@@ -363,7 +359,7 @@ class Trainer(Trainer):
         all_loss = collections.defaultdict(float)
 
         if sc_dataset_inputs:
-            mlm_loss, z = self.mlm_loss_fn(model=model, protein_seq_inputs=sc_dataset_inputs)
+            mlm_loss, z = self.mlm_loss_fn(model=model, sc_dataset_inputs=sc_dataset_inputs)
             total_loss += mlm_loss
             # all_loss['mlm'] = mlm_loss.item()
 
