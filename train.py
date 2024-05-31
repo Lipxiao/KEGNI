@@ -53,7 +53,7 @@ def main():
     sc_dataset = MAEDataset(input=args.input, n_neighbors=args.n_neighbors)
 
     kge_dataloader = KGEdataloader(sc_dataset=sc_dataset,**vars(args))
-    kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()
+    kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()#TODO 可以考虑删除kgg_kgg,kgg_scg
     scg_scg_iter = kge_dataloader.scg_scg_dataloader()
     scg_kgg_iter = kge_dataloader.scg_kgg_dataloader()
     kgg_scg_iter = kge_dataloader.kgg_scg_dataloader()

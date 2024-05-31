@@ -7,7 +7,7 @@ from dgl.utils import expand_as_pair
 
 from model.utils import create_activation
 
-
+#TODO GAT源码理解
 class GAT(nn.Module):
     def __init__(self,
                  in_dim,

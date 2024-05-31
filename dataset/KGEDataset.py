@@ -27,7 +27,6 @@ class KGEDataset(Dataset):
 
         negative_sample_list = []
         negative_sample_size = 0
-        # random.seed(42)
         while negative_sample_size < self.negative_sample_size:
             negative_sample = np.random.randint(self.nentity, size=self.negative_sample_size*2)
             # negative_sample = np.array(random.sample(self.entity, self.negative_sample_size*2))

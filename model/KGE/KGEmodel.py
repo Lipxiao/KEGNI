@@ -81,10 +81,7 @@ class KGEmodel(nn.Module):
         kgg_embedding = None
         relation_embedding = None
         if kgg_ids is not None:
-            # kgg_embedding = self.kgg_embedding[kgg_ids]
             kgg_embedding = self.kgg_embedding[[int(tensor_id.item()) for tensor_id in kgg_ids]]
         if relation_ids is not None:
-            # relation_embed = self.relation_embedding[relation_ids]
             relation_embedding = self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]]
-            # relation_embed = self.relu(self.relation_embedding[[int(tensor_id.item()) for tensor_id in relation_ids]])
         return kgg_embedding, relation_embedding

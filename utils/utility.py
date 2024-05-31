@@ -58,33 +58,6 @@ def computeScores(trueEdgesDF, predEdgeDF,
         possibleEdgesDF.loc[filter_edges, 'value'] = predEdgeDF.loc[possibleEdgesDF[filter_edges]['possibleEdges'], 'EdgeWeight'].values
         PredEdgeDict = dict(zip(possibleEdgesDF['possibleEdges'], possibleEdgesDF['value']))
 
-    # if directed:
-    #     # Initialize dictionaries with all
-    #     # possible edges
-    #     if selfEdges:
-    #         possibleEdges = list(product(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-    #                                      repeat = 2))
-    #     else:
-    #         possibleEdges = list(permutations(np.unique(trueEdgesDF.loc[:,['Gene1','Gene2']]),
-    #                                      r = 2))
-
-    #     TrueEdgeDict = {'|'.join(p):0 for p in possibleEdges}
-    #     PredEdgeDict = {'|'.join(p):0 for p in possibleEdges}
-
-    #     # Compute TrueEdgeDict Dictionary
-    #     # 1 if edge is present in the ground-truth
-    #     # 0 if edge is not present in the ground-truth
-    #     for key in TrueEdgeDict.keys():
-    #         if len(trueEdgesDF.loc[(trueEdgesDF['Gene1'] == key.split('|')[0]) &
-    #                (trueEdgesDF['Gene2'] == key.split('|')[1])])>0:
-    #                 TrueEdgeDict[key] = 1
-
-    #     for key in PredEdgeDict.keys():
-    #         subDF = predEdgeDF.loc[(predEdgeDF['Gene1'] == key.split('|')[0]) &
-    #                            (predEdgeDF['Gene2'] == key.split('|')[1])]
-    #         if len(subDF)>0:
-    #             PredEdgeDict[key] = np.abs(subDF.EdgeWeight.values[0])
-
     else:
 
         # Initialize dictionaries with all
@@ -119,20 +92,6 @@ def computeScores(trueEdgesDF, predEdgeDF,
                                     (predEdgeDF['Gene1'] == key.split('|')[1]))]
             if len(subDF) > 0:
                 PredEdgeDict[key] = max(np.abs(subDF.EdgeWeight.values))
-
-    # outDF = pd.DataFrame([TrueEdgeDict,PredEdgeDict]).T
-    # outDF.columns = ['TrueEdges','PredEdges']
-    # prroc = importr('PRROC')
-    # prCurve = prroc.pr_curve(scores_class0 = FloatVector(list(outDF['PredEdges'].values)),
-    #           weights_class0 = FloatVector(list(outDF['TrueEdges'].values)))
-
-    # fpr, tpr, thresholds = roc_curve(y_true=outDF['TrueEdges'],
-    #                                  y_score=outDF['PredEdges'], pos_label=1)
-
-    # prec, recall, thresholds = precision_recall_curve(y_true=outDF['TrueEdges'],
-    #                                                   probas_pred=outDF['PredEdges'], pos_label=1)
-
-    # return prec, recall, fpr, tpr, prCurve[2][0], auc(fpr, tpr)
 
     outDF = pd.DataFrame([TrueEdgeDict, PredEdgeDict]).T
     outDF.columns = ['TrueEdges', 'PredEdges']
@@ -192,43 +151,6 @@ def EarlyPrec(trueEdgesDF, predEdgeDF):
     # Erec = len(intersectionSet)/len(trueEdges)
 
     return Eprec
-
-
-def get_scores(edges_pos, edges_neg, adj_rec):
-
-    # Predict on test set of edges
-    preds = []
-    # pos = []
-    for e in edges_pos:
-        # print(e)
-        # print(adj_rec[e[0], e[1]])
-        preds.append((adj_rec[e[0], e[1]].item()))
-        # pos.append(adj_orig[e[0], e[1]])
-
-    # Predict on test set of negative edges
-    preds_neg = []
-    # neg = []
-    for e in edges_neg:
-
-        preds_neg.append((adj_rec[e[0], e[1]].data))
-        # neg.append(adj_orig[e[0], e[1]])
-
-    preds_all = np.hstack([preds, preds_neg])
-    labels_all = np.hstack([np.ones(len(preds)), np.zeros(len(preds_neg))])
-    roc_score = roc_auc_score(labels_all, preds_all)
-    ap_score = average_precision_score(labels_all, preds_all)
-
-    return roc_score, ap_score, preds_all, labels_all
-
-
-def get_acc(adj_label, adj_rec):
-    data_adj = torch.zeros((adj_rec.shape[0], adj_rec.shape[0]), dtype=torch.float32)
-    data_adj[adj_label['source_node_id'].values, adj_label['target_node_id'].values] = 1.0
-    labels_all = data_adj.view(-1).long()
-    # pred[pred < 0.7] = 0
-    preds_all = (adj_rec > 0.8).view(-1).long()
-    accuracy = (preds_all == labels_all).sum().float() / labels_all.size(0)
-    return accuracy
 
 
 def save_ckpt(step, model, optimizer, model_name, ckpt_folder):

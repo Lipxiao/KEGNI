@@ -12,7 +12,7 @@ from torch import optim as optim
 
 logging.basicConfig(format="%(asctime)s - %(levelname)s - %(message)s", level=logging.INFO)
 
-
+#TODO 有一些不用的函数，可以删除
 def accuracy(y_pred, y_true):
     y_true = y_true.squeeze().long()
     preds = y_pred.max(1)[1].type_as(y_true)

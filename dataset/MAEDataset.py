@@ -31,7 +31,7 @@ class MAEDataset():
             inner_product = np.dot(matrix, matrix.T)
             dist_matrix = np.sqrt(np.maximum(square_sum + square_sum.T - 2 * inner_product, 0))
             return dist_matrix
-
+        #TODO 可优化
         dist_matrix = dist(matrix)
         threshold = np.percentile(dist_matrix, 100)
         nearest_indices = np.argsort(dist_matrix)[:, :(n_neighbors + 1)]

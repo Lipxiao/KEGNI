@@ -12,7 +12,7 @@ from model.MAE import DotGAT
 from loss.mae_loss import sce_loss
 from model.utils import create_norm, drop_edge
 
-
+#TODO 可以删除除GAT之外的其他模型
 def setup_module(m_type, enc_dec, in_dim, num_hidden, out_dim, num_layers, dropout, activation, residual, norm, nhead, nhead_out, attn_drop, negative_slope=0.2, concat_out=True) -> nn.Module:
     if m_type == "gat":
         mod = GAT(
@@ -83,7 +83,6 @@ def setup_module(m_type, enc_dec, in_dim, num_hidden, out_dim, num_layers, dropo
         mod = nn.Linear(in_dim, out_dim)
     else:
         raise NotImplementedError
-
     return mod
 
 
@@ -196,19 +195,13 @@ class MAEmodel(nn.Module):
         return criterion
 
     def encoding_mask_noise(self, g, x, mask_rate=0.3):
-        # num_nodes = g.num_nodes()
-        # perm = torch.randperm(num_nodes, device=x.device)
 
-        num_nodes = len(g.nodes()[g.out_degrees() > 1])
-        indices = torch.randperm(num_nodes, device=x.device)
-        perm = g.nodes()[g.out_degrees() > 1][indices]
-        lonely_nodes = g.nodes()[g.out_degrees() <= 1]
-        num_mask_nodes = int(mask_rate * num_nodes)
+        num_nodes = len(g.nodes())
+        perm = torch.randperm(num_nodes, device=x.device)
 
         # random masking
         num_mask_nodes = int(mask_rate * num_nodes)
         mask_nodes = perm[: num_mask_nodes]
-        keep_nodes = perm[num_mask_nodes:]
 
         if self._replace_rate > 0:
             num_noise_nodes = int(self._replace_rate * num_mask_nodes)
@@ -228,7 +221,7 @@ class MAEmodel(nn.Module):
         out_x[token_nodes] += self.enc_mask_token
         use_g = g.clone()
 
-        return use_g, out_x, (mask_nodes, keep_nodes, lonely_nodes)
+        return use_g, out_x, mask_nodes
 
     def forward(self, g, x):
         # ---- attribute reconstruction ----
@@ -237,7 +230,7 @@ class MAEmodel(nn.Module):
         return loss, embed
 
     def mask_attr_prediction(self, g, x):
-        pre_use_g, use_x, (mask_nodes, keep_nodes, lonely_nodes) = self.encoding_mask_noise(g, x, self._mask_rate)
+        pre_use_g, use_x, mask_nodes = self.encoding_mask_noise(g, x, self._mask_rate)
 
         if self._drop_edge_rate > 0:
             use_g, masked_edges = drop_edge(pre_use_g, self._drop_edge_rate, return_edges=True)
@@ -263,15 +256,9 @@ class MAEmodel(nn.Module):
         x_init = x[mask_nodes]
         x_rec = recon[mask_nodes]
 
-        # x_init = x[torch.cat([mask_nodes, lonely_nodes],dim =0 )]
-        # x_rec = recon[torch.cat([mask_nodes, lonely_nodes],dim =0 )]
-
-        # x_init = x
-        # x_rec = recon
-
         loss = self.criterion(x_rec, x_init)
         return loss, enc_rep
-
+    #TODO embed是encoder的直接输出，graphMAE对embed的输出也先传入了linear层，再传入decoder
     def embed(self, g, x):
         rep = self.encoder(g, x)
         return rep
