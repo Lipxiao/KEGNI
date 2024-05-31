@@ -75,7 +75,6 @@ class KGEdataloader():
             KGEDataset(self.kgg_kgg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='head-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
@@ -83,7 +82,6 @@ class KGEdataloader():
             KGEDataset(self.kgg_kgg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='tail-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
@@ -95,7 +93,6 @@ class KGEdataloader():
             KGEDataset(self.scg_scg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='head-batch', nentity=len(self.scg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
@@ -103,7 +100,6 @@ class KGEdataloader():
             KGEDataset(self.scg_scg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='tail-batch', nentity=len(self.scg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
@@ -115,7 +111,6 @@ class KGEdataloader():
             KGEDataset(self.kgg_scg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='head-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
@@ -123,13 +118,20 @@ class KGEdataloader():
         return kgg_scg_iter
 
     def scg_kgg_dataloader(self):
+        scg_kgg_dataloader_head = DataLoader(
+            KGEDataset(self.scg_kgg_triples,  negative_sample_size=self.negative_sample_size,
+                       mode='head-batch', nentity=len(self.scg2id)),
+            batch_size=int(self.batch_size),
+            shuffle=True,
+            collate_fn=KGEDataset.collate_fn
+        )
         scg_kgg_dataloader_tail = DataLoader(
             KGEDataset(self.scg_kgg_triples,  negative_sample_size=self.negative_sample_size,
                        mode='tail-batch', nentity=len(self.kgg2id)),
             batch_size=int(self.batch_size),
-            # batch_size = len(go_go_triples),
             shuffle=True,
             collate_fn=KGEDataset.collate_fn
         )
-        scg_kgg_iter = BidirectionalOneShotIterator.one_shot_iterator(scg_kgg_dataloader_tail)
+        scg_kgg_iter = BidirectionalOneShotIterator(scg_kgg_dataloader_head, scg_kgg_dataloader_tail)
+        # scg_kgg_iter = BidirectionalOneShotIterator.one_shot_iterator(scg_kgg_dataloader_tail)
         return scg_kgg_iter

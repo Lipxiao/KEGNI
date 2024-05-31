@@ -3,10 +3,8 @@ import torch
 from itertools import product, permutations, combinations, combinations_with_replacement
 import pandas as pd
 import numpy as np
-import seaborn as sns
-import seaborn as sns
-sns.set(rc={"lines.linewidth": 2}, palette="deep", style="ticks")
-
+import os
+from itertools import product, permutations
 
 def computeScores(trueEdgesDF, predEdgeDF,
                   directed=True, selfEdges=True):
@@ -52,11 +50,11 @@ def computeScores(trueEdgesDF, predEdgeDF,
         possibleEdgesDF.loc[(possibleEdgesDF.loc[:, 'possibleEdges'].isin(trueEdges)), 'value'] = 1
         TrueEdgeDict = dict(zip(possibleEdgesDF['possibleEdges'], possibleEdgesDF['value']))
 
-        predEdgeDF['Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
-        predEdgeDF.index = predEdgeDF['Edges']
+        predEdgeDF.loc[:, 'Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
+        predEdgeDF.index = predEdgeDF.loc[:, 'Edges']
         # data = {'possibleEdges': list({'|'.join(p) for p in possibleEdges}), 'value': value}
         possibleEdgesDF = pd.DataFrame(data)
-        filter_edges = possibleEdgesDF['possibleEdges'].isin(predEdgeDF['Edges'])
+        filter_edges = possibleEdgesDF['possibleEdges'].isin(predEdgeDF.loc[:, 'Edges'])
         possibleEdgesDF.loc[filter_edges, 'value'] = predEdgeDF.loc[possibleEdgesDF[filter_edges]['possibleEdges'], 'EdgeWeight'].values
         PredEdgeDict = dict(zip(possibleEdgesDF['possibleEdges'], possibleEdgesDF['value']))
 
@@ -150,11 +148,10 @@ def computeScores(trueEdgesDF, predEdgeDF,
 
 def EarlyPrec(trueEdgesDF, predEdgeDF):
 
-    predEdgeDF['Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
+    # predEdgeDF['Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
+    predEdgeDF.loc[:, 'Edges'] = predEdgeDF['Gene1'] + "|" + predEdgeDF['Gene2']
     # limit the predicted edges to the genes that are in the ground truth
     Eprec = {}
-    from itertools import product, permutations
-    import os
     # Consider only edges going out of TFs
 
     trueEdgesDF = trueEdgesDF.loc[(trueEdgesDF['Gene1'] != trueEdgesDF['Gene2'])]
@@ -176,7 +173,7 @@ def EarlyPrec(trueEdgesDF, predEdgeDF):
     trueEdges = trueEdges[trueEdges.isin(TrueEdgeDict)]
     numEdges = len(trueEdges)
 
-    predDF_new = predEdgeDF[predEdgeDF['Edges'].isin(TrueEdgeDict)]
+    predDF_new = predEdgeDF[predEdgeDF.loc[:, 'Edges'].isin(TrueEdgeDict)]
 
     # Use num True edges or the number of
     # edges in the dataframe, which ever is lower
@@ -232,3 +229,20 @@ def get_acc(adj_label, adj_rec):
     preds_all = (adj_rec > 0.8).view(-1).long()
     accuracy = (preds_all == labels_all).sum().float() / labels_all.size(0)
     return accuracy
+
+
+def save_ckpt(step, model, optimizer, model_name, ckpt_folder):
+
+    if not os.path.exists(ckpt_folder):
+        os.makedirs(ckpt_folder)
+    torch.save(
+        {
+            'step': step,
+            # 'model': model,
+            'model_state_dict': model.state_dict(),
+            'optimizer_state_dict': optimizer.state_dict(),
+            # 'scheduler_state_dict': lr_scheduler.state_dict()
+        },
+        f'{ckpt_folder}{model_name}.pth'
+    )
+    

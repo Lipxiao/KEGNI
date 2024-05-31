@@ -14,9 +14,9 @@ class KEGNI(nn.Module):
         super().__init__()
         
         self.device = kwargs.get("device")
-        scg2id = kwargs.get("scg2id")
-        relation2id = kwargs.get("relation2id")
-        kgg2id = kwargs.get("kgg2id")
+        self.scg2id = kwargs.get("scg2id")
+        self.relation2id = kwargs.get("relation2id")
+        self.kgg2id = kwargs.get("kgg2id")
         num_features = kwargs.get("num_features")
         num_hidden = kwargs.get("num_hidden")
         gamma = kwargs.get("gamma")
@@ -43,9 +43,9 @@ class KEGNI(nn.Module):
         else:
             self.device = f"cuda:{self.device}" if torch.cuda.is_available() else "cpu"
         self.kge_model = KGEmodel(
-            nrelation=len(relation2id),
-            nscg=len(scg2id),
-            nkgg=len(kgg2id),
+            nrelation=len(self.relation2id),
+            nscg=len(self.scg2id),
+            nkgg=len(self.kgg2id),
             num_hidden=num_hidden,
             gamma=gamma)
 
@@ -89,15 +89,3 @@ class KEGNI(nn.Module):
             relation_ids=relation_ids
         )
         return scg_embedding, kgg_embedding, relation_embedding
-
-    # def save_pretrained(
-    #     self,
-    #     save_directory: os.PathLike,
-    #     state_dict: Optional[dict] = None,
-    #     save_config: bool = True,
-    # ):
-    #     protein_save_directory = os.path.join(save_directory, 'protein')
-    #     onto_save_directory = os.path.join(save_directory, 'onto')
-    #     if self.mae_model:
-    #         self.mae_model.save_pretrained(protein_save_directory, save_config=save_config)
-    #     self.kg_model.save_pretrained(onto_save_directory, save_config=save_config)

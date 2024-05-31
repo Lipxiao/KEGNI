@@ -39,16 +39,16 @@ class KGEmodel(nn.Module):
             b=self.embedding_range.item()
         )
         # nn.init.xavier_normal_(
-        #     tensor=self.go_embedding,
+        #     tensor=self.kgg_embedding,
         #     gain = self.gamma.item()
         # )
         # nn.init.normal_(
-        #     tensor=self.go_embedding,
+        #     tensor=self.kgg_embedding,
         #     mean=0,
         #     std=1
         # )
         # nn.init.uniform_(
-        #     tensor=self.go_embedding,
+        #     tensor=self.kgg_embedding,
         #     a=-0.1,
         #     b=0.1
         # )
@@ -81,7 +81,7 @@ class KGEmodel(nn.Module):
         kgg_embedding = None
         relation_embedding = None
         if kgg_ids is not None:
-            # go_embed = self.go_embedding[go_ids]
+            # kgg_embedding = self.kgg_embedding[kgg_ids]
             kgg_embedding = self.kgg_embedding[[int(tensor_id.item()) for tensor_id in kgg_ids]]
         if relation_ids is not None:
             # relation_embed = self.relation_embedding[relation_ids]
