@@ -195,7 +195,7 @@ class Trainer(Trainer):
         # pd.DataFrame(recon_exp.cpu().numpy(),index= list(model.scg2id.keys())).to_csv('./outputs/'+basename+'-recon.csv')
 
         outname = os.path.splitext(os.path.basename(self.args.input))[0]
-        predDF.to_csv('/media/disk/project/KEGIN/outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
+        predDF.to_csv('/media/disk/project/GRN/KEGNI/outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
         if self.args.save_checkpoint:
             ckpt_folder = './checkpoints/'
             save_ckpt(step, model, self.optimizer,  basename,ckpt_folder)

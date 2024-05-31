@@ -9,8 +9,8 @@ def parser_args():
     main_group.add_argument("--max_steps", type=int,  default=100)
     main_group.add_argument('--device', type=int, default=0)
 
-    main_group.add_argument('--input', '-i', type=str, help='prefix of dataset ')
-    main_group.add_argument('--eval', '-e', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
+    main_group.add_argument('--input', '-i',default='/media/disk/project/GRN/KEGNI/data/BEELINE/mESC_exp.csv', type=str, help='prefix of dataset ')
+    main_group.add_argument('--eval', '-e', action="store_true", default=True, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--save_checkpoint', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--load_checkpoint', type=str, help='load checkpoint for training')
     main_group.add_argument('--norm', '-p', type=int, default='2', help='norm for pred construction')
@@ -38,7 +38,7 @@ def parser_args():
     mae_group.add_argument("--alpha_l", type=float, default=1, help="`pow`coefficient for `sce` loss")
     mae_group.add_argument("--concat_hidden", action="store_true", default=False)
     
-    kge_group.add_argument('--data_path', type=str)
+    kge_group.add_argument('--data_path',default='/media/disk/project/KnowledgeGraphEmbedding/data/KEGG/KEGG_mESC.tsv', type=str)
     kge_group.add_argument('--model', default='ComplEx', type=str)
     kge_group.add_argument('--negative_sample_size', default=16, type=int)
     kge_group.add_argument('-g', '--gamma', default=12.0, type=float)

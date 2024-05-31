@@ -5,7 +5,7 @@ import os
 import argparse
 def parse_args():
     parser = argparse.ArgumentParser(description='Plot the loss curve')
-    parser.add_argument('--file_path','-f', type=str, default='/media/disk/project/KEGIN/script/results/mHSC-E/mHSC-E_20_256_4_3_20240530_dict.pkl', help='The path of the loss file')
+    parser.add_argument('--file_path','-f', type=str, default='/media/disk/project/GRN/KEGNI/script/results/mHSC-E/mHSC-E_20_256_4_3_20240530_dict.pkl', help='The path of the loss file')
     return parser.parse_args()
 
 def MultiPlot(file_path):
