@@ -1,7 +1,9 @@
 #不同工具之间比较
 library(ggplot2)
 library(dplyr)
-data <- read.csv("/media/disk/project/0.paper/fig2data.csv")
+dir = '/media/disk/project/GRN/forpaper/'
+setwd(dir)
+data <- read.csv("docs/fig2data.csv")
 
 data[1:3,]
 dim(data)
@@ -17,6 +19,7 @@ data_norm <- apply(data[,6:dim],1,function(x){
 })
 data_norm <- as.data.frame(t(data_norm))
 
+apply(data_norm,2,median)
 library(tidyr)
 tmp <- gather(data_norm,key = "tools",value = "EPR",1:8)
 tmp$tools <- factor(tmp$tools,levels = c("KGE.MAE","MAE","PIDC","GENIE3","GRNBOOST2","SCODE","PPCOR","SINCERITIES"))
@@ -25,26 +28,30 @@ ggplot(tmp,aes(x = tools,y = EPR,fill = tools))+
     geom_boxplot()+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1))+
-    labs(title = "EPR",x = "Tools",y = "Normalized EPR")
-ggsave("/media/disk/project/0.paper/fig2_rank_EPR.png",width = 6,height = 4)
+    labs(title = "EPR",x = "Tools",y = "Normalized EPR")+
+    scale_y_continuous(breaks = seq(0,1,0.1))
+ggsave("figures/fig2_rank_EPR.png",width = 6,height = 4)
+ggsave("figures/fig2_rank_EPR.eps",width = 6,height = 4)
 
 
-data_norm$dataset <- data[1:21,"gt"]
-data_norm$celltype <- data[1:21,"celltype"]
+data_norm$dataset <- data[1:22,"gt"]
+data_norm$celltype <- data[1:22,"celltype"]
 data_norm
 library(tidyr)
 # data_norm$merge <- paste(data_norm$dataset,data_norm$celltype,sep = "_")
 tmp <- gather(data_norm,key = "tools",value = "EPR",1:8) 
 tmp$tools <- factor(tmp$tools,levels = c("KGE.MAE","MAE","PIDC","GENIE3","GRNBOOST2","SCODE","PPCOR","SINCERITIES"))
 ggplot(tmp,aes(x = tools,y = EPR))+
-    geom_violin(width = 1.1)+
+    geom_violin(width = 1)+
     geom_boxplot(width = 0.2)+
     geom_jitter(aes(color = celltype,shape =dataset ),size = 2)+ 
     # facet_wrap(~dataset,scales = "free_x")+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1))+
     labs(title = "EPR",x = "Tools",y = "Normalized EPR")
-ggsave("/media/disk/project/0.paper/fig2_rank_EPR_point.png",width = 17,height = 10)
+ggsave("figures/fig2_rank_EPR_point.png",width = 17,height = 10)
+ggsave("figures/fig2_rank_EPR_point.eps",width = 17,height = 10)
+
 
 
 
@@ -63,12 +70,14 @@ ggplot(tmp,aes( x= tools,y=ranksum,fill = tools))+
     geom_bar(stat = "identity")+
     theme_bw()+
     theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ggsave("/media/disk/project/0.paper/fig2_rank_sum.png",width = 6,height = 4)
+ggsave("figures/fig2_rank_sum.png",width = 6,height = 4)
+ggsave("figures/fig2_rank_sum.eps",width = 6,height = 4)
+
 data_rank$dataset <- paste(data$gt,data$celltype,sep = "_")
 data_rank$gt <- data$gt
 data_rank$celltype <- data$celltype
 data_rank$gt <- factor(data_rank$gt,levels = c("STRING","Non-specific ChIP-Seq","Cell-type specific ChIP-Seq","log/gof"))
-data_rank$gt <- factor(data_rank$gt,levels = c("STRING","Non-specific ChIP-Seq","Cell-type specific ChIP-Seq"))
+# data_rank$gt <- factor(data_rank$gt,levels = c("STRING","Non-specific ChIP-Seq","Cell-type specific ChIP-Seq"))
 
 ggplot(data_rank,aes(x= celltype,y = KGE.MAE))+
     geom_segment(aes(xend = celltype,yend = 1),color = "black",linetype="dashed")+
@@ -77,12 +86,38 @@ ggplot(data_rank,aes(x= celltype,y = KGE.MAE))+
     theme_bw()+
     theme(axis.text.x = element_text(size = 10, angle = 80, hjust = 1,face = "bold"))+
     theme(axis.text.y = element_text(size = 10,face = "bold"))+
-    scale_y_continuous(limits = c(1,7),breaks = 1:7,labels = c("1","2","3","4","5","6","7"))+
+    scale_y_continuous(limits = c(1,8),breaks = 1:7,labels = c("1","2","3","4","5","6","7"))+
     facet_wrap(~gt,scales = "free_x",nrow =1 )
     # facet_grid(.~gt,scales = "free_x",space = "free_y")
 
-ggsave("/media/disk/project/0.paper/fig2_rank_KGE.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_KGE.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_KGE.eps",width = 10,height = 6)
 
+ggplot(data_rank,aes(x= celltype,y = PIDC))+
+    geom_segment(aes(xend = celltype,yend = 1),color = "black",linetype="dashed")+
+    geom_point(color = "red",size = 4)+
+    # geom_segment(aes(xend = dataset,yend = 1),color = "black",linetype="dashed")+
+    theme_bw()+
+    theme(axis.text.x = element_text(size = 10, angle = 80, hjust = 1,face = "bold"))+
+    theme(axis.text.y = element_text(size = 10,face = "bold"))+
+    scale_y_continuous(limits = c(1,8),breaks = 1:7,labels = c("1","2","3","4","5","6","7"))+
+    facet_wrap(~gt,scales = "free_x",nrow =1 )
+    # facet_grid(.~gt,scales = "free_x",space = "free_y")
+ggsave("figures/fig2_rank_PIDC.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_PIDC.eps",width = 10,height = 6)
+
+ggplot(data_rank,aes(x= celltype,y = GENIE3))+
+    geom_segment(aes(xend = celltype,yend = 1),color = "black",linetype="dashed")+
+    geom_point(color = "red",size = 4)+
+    # geom_segment(aes(xend = dataset,yend = 1),color = "black",linetype="dashed")+
+    theme_bw()+
+    theme(axis.text.x = element_text(size = 10, angle = 80, hjust = 1,face = "bold"))+
+    theme(axis.text.y = element_text(size = 10,face = "bold"))+
+    scale_y_continuous(limits = c(1,8),breaks = 1:7,labels = c("1","2","3","4","5","6","7"))+
+    facet_wrap(~gt,scales = "free_x",nrow =1 )
+    # facet_grid(.~gt,scales = "free_x",space = "free_y")
+ggsave("figures/fig2_rank_GENIE3.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_GENIE3.eps",width = 10,height = 6)
 
 ggplot(data_rank,aes(x= celltype,y = MAE))+
     geom_segment(aes(xend = celltype,yend = 1),color = "black",linetype="dashed")+
@@ -95,7 +130,9 @@ ggplot(data_rank,aes(x= celltype,y = MAE))+
     facet_wrap(~gt,scales = "free_x",nrow =1 )
     # facet_grid(.~gt,scales = "free_x",space = "free_y")
 
-ggsave("/media/disk/project/0.paper/fig2_rank_MAE.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_MAE.png",width = 10,height = 6)
+ggsave("figures/fig2_rank_MAE.eps",width = 10,height = 6)
+
 
 
 
