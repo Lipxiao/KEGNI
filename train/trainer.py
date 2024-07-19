@@ -135,28 +135,28 @@ class Trainer(Trainer):
 
                 if name == "mESC":
                     gt_paths = {
-                        'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-STRING-network.csv',
-                        'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-NonSpe-network.csv',
-                        'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-ChIP-network.csv',
-                        'lofgof': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-lofgof-network.csv'}
+                        'STRING': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-STRING-network.csv',
+                        'NonSpe':self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-NonSpe-network.csv',
+                        'ChIP': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-ChIP-network.csv',
+                        'lofgof': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-lofgof-network.csv'}
                 else:
                     gt_paths = {
-                        'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-STRING-network.csv',
-                        'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-NonSpe-network.csv',
-                        'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-ChIP-network.csv'}
+                        'STRING': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-STRING-network.csv',
+                        'NonSpe': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-NonSpe-network.csv',
+                        'ChIP': self.args.dir + 'data/GroundTruth/TFs500/' + name + '/' + name + '-ChIP-network.csv'}
                 if self.args.genes == 1000:
                     print(self.args.genes)
                     if name == "mESC":
                         gt_paths = {
-                            'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-STRING-network.csv',
-                            'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-NonSpe-network.csv',
-                            'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-ChIP-network.csv',
-                            'lofgof': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-lofgof-network.csv'}
+                            'STRING': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-STRING-network.csv',
+                            'NonSpe': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-NonSpe-network.csv',
+                            'ChIP': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-ChIP-network.csv',
+                            'lofgof': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-lofgof-network.csv'}
                     else:
                         gt_paths = {
-                            'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-STRING-network.csv',
-                            'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-NonSpe-network.csv',
-                            'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-ChIP-network.csv'}                    
+                            'STRING': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-STRING-network.csv',
+                            'NonSpe': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-NonSpe-network.csv',
+                            'ChIP': self.args.dir + 'data/GroundTruth/TFs1000/' + name + '/' + name + '-ChIP-network.csv'}                    
                     
                 for i in gt_paths.keys():
                     dataset = gt_paths[i]
@@ -232,7 +232,7 @@ class Trainer(Trainer):
         # pd.DataFrame(recon_exp.cpu().numpy(),index= list(model.scg2id.keys())).to_csv('./outputs/'+basename+'-recon.csv')
 
         # outname = os.path.splitext(os.path.basename(self.args.input))[0]
-        # predDF.to_csv('/media/disk/project/GRN/KEGNI/outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
+        # predDF.to_csv('./outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
         if self.args.save_checkpoint:
             ckpt_folder = './checkpoints/'
             save_ckpt(step, model, self.optimizer,  basename,ckpt_folder)
