@@ -48,7 +48,8 @@ def create_activation(name):
     elif name == "tanh":
         return nn.Tanh()
     else:
-        raise NotImplementedError(f"{name} is not implemented.")
+        # raise NotImplementedError(f"{name} is not implemented.")
+        raise NotImplementedError("{} is not implemented.".format(name))
 
 
 def create_norm(name):

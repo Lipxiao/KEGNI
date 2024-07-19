@@ -41,7 +41,8 @@ class Trainer(Trainer):
         if self.args.device < 0:
             self.device = "cpu"
         else:
-            self.device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
+            # self.device = f"cuda:{self.args.device}" if torch.cuda.is_available()  else "cpu"
+            self.device = "cuda:" + str(self.args.device) if torch.cuda.is_available() else "cpu"
         max_steps = self.args.max_steps
         model = self.model
         sc_dataset_iter = self.sc_dataset_iter
@@ -201,19 +202,30 @@ class Trainer(Trainer):
             #     **{f"best_epr_{key}": f"{info['epr']:.5f}" for key, info in best_models.items()},
             #     **{f"step_{key}": info['step'] for key, info in best_models.items()}
             # })
+            # df = pd.DataFrame({
+            #     'max_steps': [max_steps],
+            #     **{f"best_epr_{key}": f"{info['epr']:.5f}" for key, info in best_models.items()},
+            #     **{f"best_epr_step_{key}": info['best_epr_step'] for key, info in best_models.items()},
+            #     **{f"pr_{key}": f"{info['pr']:.5f}" for key, info in best_models.items()},
+            #     **{f"best_pr_step_{key}": info['best_pr_step'] for key, info in best_models.items()},
+            #     **{f"roc_{key}": f"{info['roc']:.5f}" for key, info in best_models.items()},
+            #     **{f"best_roc_step_{key}": info['best_roc_step'] for key, info in best_models.items()},
+            # })
             df = pd.DataFrame({
-                'max_steps': [max_steps],
-                **{f"best_epr_{key}": f"{info['epr']:.5f}" for key, info in best_models.items()},
-                **{f"best_epr_step_{key}": info['best_epr_step'] for key, info in best_models.items()},
-                **{f"pr_{key}": f"{info['pr']:.5f}" for key, info in best_models.items()},
-                **{f"best_pr_step_{key}": info['best_pr_step'] for key, info in best_models.items()},
-                **{f"roc_{key}": f"{info['roc']:.5f}" for key, info in best_models.items()},
-                **{f"best_roc_step_{key}": info['best_roc_step'] for key, info in best_models.items()},
+                'max_steps': [100],  # 假设 max_steps 是一个已知的值
+                **{"best_epr_{}".format(key): "{:.5f}".format(info['epr']) for key, info in best_models.items()},
+                **{"best_epr_step_{}".format(key): info['best_epr_step'] for key, info in best_models.items()},
+                **{"pr_{}".format(key): "{:.5f}".format(info['pr']) for key, info in best_models.items()},
+                **{"best_pr_step_{}".format(key): info['best_pr_step'] for key, info in best_models.items()},
+                **{"roc_{}".format(key): "{:.5f}".format(info['roc']) for key, info in best_models.items()},
+                **{"best_roc_step_{}".format(key): info['best_roc_step'] for key, info in best_models.items()},
             })
+
 
             save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
             current_date = datetime.now().strftime("%Y%m%d%H")
-            filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
+            # filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
+            filename = str.join('', [save_path, basename.split('_')[0], str(self.args.n_neighbors), str(self.args.num_hidden), str(self.args.num_heads), str(self.args.num_layers), current_date, '.csv'])
             os.makedirs(save_path, exist_ok=True)
             df.to_csv(os.path.join(filename), index=False)
                                   
@@ -243,7 +255,17 @@ class Trainer(Trainer):
         save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
         os.makedirs(save_path, exist_ok=True)
         current_date = datetime.now().strftime("%Y%m%d%H")
-        filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{self.args.norm}_{current_date}_dict.pkl"
+        # filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{self.args.norm}_{current_date}_dict.pkl"
+        filename = "{}{}_{}_{}_{}_{}_{}_{}_dict.pkl".format(
+            save_path,
+            basename.split('_')[0],
+            self.args.n_neighbors,
+            self.args.num_hidden,
+            self.args.num_heads,
+            self.args.num_layers,
+            self.args.norm,
+            current_date
+        )
         os.makedirs(save_path, exist_ok=True)
         with open(filename, 'wb') as f:
             pkl.dump((loss,mae_loss, kgg_kgg_loss, kgg_scg_loss, scg_scg_loss, scg_kgg_loss,epr_values,pr_values,roc_values), f)

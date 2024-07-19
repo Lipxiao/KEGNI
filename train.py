@@ -12,10 +12,7 @@ import datetime
 import numpy as np
 import random
 from utils import set_seed
-current_time = datetime.datetime.now()
-formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
-log_filename = f"my_log_{formatted_time}.log"
 
 def main():
     set_seed(42)
@@ -26,8 +23,11 @@ def main():
     logger.setLevel(logging.DEBUG)
     log_folder = "log"
     os.makedirs(log_folder, exist_ok=True)
+    current_time = datetime.datetime.now()
+    formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
-    log_filename = os.path.join(log_folder, f"{prefix}_{formatted_time}.log")
+    log_filename = os.path.join(log_folder, "{}_{}.log".format(prefix, formatted_time))
+
     fh = logging.FileHandler(filename=log_filename)
     fh.setLevel(logging.DEBUG)
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

@@ -41,7 +41,8 @@ class KEGNI(nn.Module):
         if self.device < 0:
             self.device = "cpu"
         else:
-            self.device = f"cuda:{self.device}" if torch.cuda.is_available() else "cpu"
+            # self.device = f"cuda:{self.device}" if torch.cuda.is_available() else "cpu"
+            self.device = "cuda:" + str(self.device) if torch.cuda.is_available() else "cpu"
         self.kge_model = KGEmodel(
             nrelation=len(self.relation2id),
             nscg=len(self.scg2id),

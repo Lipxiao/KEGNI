@@ -25,7 +25,8 @@ class KGEloss:
         if self.args.device < 0:
             device = "cpu"
         else:
-            device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
+            # device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
+            device = "cuda:" + str(self.args.device) if torch.cuda.is_available() else "cpu"
             
         model_func = {
             'TransE': self.TransE,

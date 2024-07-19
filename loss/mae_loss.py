@@ -39,7 +39,8 @@ class MAEloss:
         if self.args.device < 0:
             device = "cpu"
         else:
-            device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
+            # device = f"cuda:{self.args.device}" if torch.cuda.is_available() else "cpu"
+            device = "cuda:" + str(self.args.device) if torch.cuda.is_available() else "cpu"
 
         graph = sc_dataset_inputs
         x = graph.ndata["feat"]
