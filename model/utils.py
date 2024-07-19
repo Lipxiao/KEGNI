@@ -45,6 +45,8 @@ def create_activation(name):
         return nn.Identity()
     elif name == "elu":
         return nn.ELU()
+    elif name == "tanh":
+        return nn.Tanh()
     else:
         raise NotImplementedError(f"{name} is not implemented.")
 

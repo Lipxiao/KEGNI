@@ -5,6 +5,7 @@ import pandas as pd
 import numpy as np
 import os
 from itertools import product, permutations
+import random
 
 def computeScores(trueEdgesDF, predEdgeDF,
                   directed=True, selfEdges=True):
@@ -167,4 +168,16 @@ def save_ckpt(step, model, optimizer, model_name, ckpt_folder):
         },
         f'{ckpt_folder}{model_name}.pth'
     )
+
+def set_seed(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    if torch.cuda.is_available():
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.enabled = False
     

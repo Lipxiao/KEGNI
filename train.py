@@ -11,25 +11,11 @@ import torch
 import datetime
 import numpy as np
 import random
-
+from utils import set_seed
 current_time = datetime.datetime.now()
 formatted_time = current_time.strftime("%Y-%m-%d-%H-%M-%S")
 
 log_filename = f"my_log_{formatted_time}.log"
-
-
-def set_seed(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    if torch.cuda.is_available():
-        torch.manual_seed(seed)
-        torch.cuda.manual_seed(seed)
-        torch.cuda.manual_seed_all(seed)  # if you are using multi-GPU.
-        torch.backends.cudnn.benchmark = False
-        torch.backends.cudnn.deterministic = True
-        torch.backends.cudnn.enabled = False
-
 
 def main():
     set_seed(42)
@@ -53,10 +39,27 @@ def main():
     sc_dataset = MAEDataset(input=args.input, n_neighbors=args.n_neighbors)
 
     kge_dataloader = KGEdataloader(sc_dataset=sc_dataset,**vars(args))
-    kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()#TODO 可以考虑删除kgg_kgg,kgg_scg
-    scg_scg_iter = kge_dataloader.scg_scg_dataloader()
-    scg_kgg_iter = kge_dataloader.scg_kgg_dataloader()
-    kgg_scg_iter = kge_dataloader.kgg_scg_dataloader()
+    
+    if kge_dataloader.kgg_kgg_triples:
+        kgg_kgg_iter = kge_dataloader.kgg_kgg_dataloader()#TODO 可以考虑删除kgg_kgg,kgg_scg
+    else:
+        kgg_kgg_iter = None
+        
+    if kge_dataloader.scg_scg_triples:
+        scg_scg_iter = kge_dataloader.scg_scg_dataloader()
+    else:
+        scg_scg_iter = None
+        
+    if kge_dataloader.scg_kgg_triples:
+        scg_kgg_iter = kge_dataloader.scg_kgg_dataloader()
+    else:
+        scg_kgg_iter = None
+        
+    if kge_dataloader.kgg_scg_triples:
+        kgg_scg_iter = kge_dataloader.kgg_scg_dataloader()
+    else:
+        kgg_scg_iter = None       
+
 
     model = KEGNI(num_features=sc_dataset.num_features,
                   kgg2id=kge_dataloader.kgg2id,

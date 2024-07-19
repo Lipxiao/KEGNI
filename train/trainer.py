@@ -144,7 +144,20 @@ class Trainer(Trainer):
                         'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-STRING-network.csv',
                         'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-NonSpe-network.csv',
                         'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/' + name + '/' + name + '-ChIP-network.csv'}
-                
+                if self.args.genes == 1000:
+                    print(self.args.genes)
+                    if name == "mESC":
+                        gt_paths = {
+                            'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-STRING-network.csv',
+                            'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-NonSpe-network.csv',
+                            'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-ChIP-network.csv',
+                            'lofgof': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-lofgof-network.csv'}
+                    else:
+                        gt_paths = {
+                            'STRING': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-STRING-network.csv',
+                            'NonSpe': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-NonSpe-network.csv',
+                            'ChIP': '/media/disk/project/crosstalk/BEELINE/Beeline/inputs/TF1000/' + name + '/' + name + '-ChIP-network.csv'}                    
+                    
                 for i in gt_paths.keys():
                     dataset = gt_paths[i]
                     trueEdgesDF = pd.read_csv(dataset, sep = ',',header = 0, index_col = None)
@@ -152,29 +165,53 @@ class Trainer(Trainer):
                     epr_values.append(epr)
                     pr_values.append(pr)
                     roc_values.append(roc)
-                    if i not in best_models or epr > best_models[i]['epr']:
-                        best_models[i] =  {'step':step+1,'epr': epr, 'pr': pr, 'roc': roc, 'model': model}
-                        if self.args.save_checkpoint:
-                            ckpt_folder = './checkpoints/best/'
-                            pt_name = name + '_' + i
-                            save_ckpt(step,  best_models[i]['model'], self.optimizer,  pt_name,ckpt_folder)
+                    if i not in best_models :
+                        best_models[i] =  {'epr': epr, 'best_epr_step': step+1,'pr': pr, 'best_pr_step': step+1,'roc': roc,'best_roc_step': step+1, 'best_epr_model': model}
+                    if epr > best_models[i]['epr']:
+                        best_models[i]['epr'] = epr
+                        best_models[i]['best_epr_step'] = step+1
+                        best_models[i]['best_epr_model'] = model
+                    if pr > best_models[i]['pr']:
+                        best_models[i]['pr'] = pr
+                        best_models[i]['best_pr_step'] = step+1
+                    if roc > best_models[i]['roc']:
+                        best_models[i]['roc'] = roc
+                        best_models[i]['best_roc_step'] = step+1
+                    
+                    if self.args.save_checkpoint:
+                        ckpt_folder = './checkpoints/best/'
+                        pt_name = name + '_' + i
+                        save_ckpt(step,  best_models[i]['best_epr_model'], self.optimizer,  pt_name,ckpt_folder)
         if self.args.eval:    
             for key in best_models:
                 best_info = best_models[key]
                 self.logger.info(
-                    "%s: best_epr: %.5f, step: %d",
+                    "%s: best_epr: %.5f,best_epr_step: %d,best_pr: %.5f, best_pr_step: %d,best_roc: %.5f,best_roc_step: %d",
                     key,
                     best_info['epr'],
-                    best_info['step']
+                    best_info['best_epr_step'],
+                    best_info['pr'],
+                    best_info['best_pr_step'],
+                    best_info['roc'],
+                    best_info['best_roc_step']
                 )
                 
+            # df = pd.DataFrame({
+            #     'max_steps': [max_steps],
+            #     **{f"best_epr_{key}": f"{info['epr']:.5f}" for key, info in best_models.items()},
+            #     **{f"step_{key}": info['step'] for key, info in best_models.items()}
+            # })
             df = pd.DataFrame({
                 'max_steps': [max_steps],
                 **{f"best_epr_{key}": f"{info['epr']:.5f}" for key, info in best_models.items()},
-                **{f"step_{key}": info['step'] for key, info in best_models.items()}
+                **{f"best_epr_step_{key}": info['best_epr_step'] for key, info in best_models.items()},
+                **{f"pr_{key}": f"{info['pr']:.5f}" for key, info in best_models.items()},
+                **{f"best_pr_step_{key}": info['best_pr_step'] for key, info in best_models.items()},
+                **{f"roc_{key}": f"{info['roc']:.5f}" for key, info in best_models.items()},
+                **{f"best_roc_step_{key}": info['best_roc_step'] for key, info in best_models.items()},
             })
 
-            save_path = 'results/' + basename.split('_')[0]+'/'
+            save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
             current_date = datetime.now().strftime("%Y%m%d%H")
             filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
             os.makedirs(save_path, exist_ok=True)
@@ -183,8 +220,8 @@ class Trainer(Trainer):
         model.eval()
         with torch.no_grad():
             z = model.mae_model.embed(sc_dataset_inputs, sc_dataset_inputs.ndata['feat'])
-            predDF = self.recon(z)
-            recon_exp = model.mae_model.decoder(sc_dataset_inputs, model.mae_model.encoder_to_decoder(z))
+            # predDF = self.recon(z)
+            # recon_exp = model.mae_model.decoder(sc_dataset_inputs, model.mae_model.encoder_to_decoder(z))
 
         if not os.path.exists('./outputs/'):
             os.makedirs('./outputs/')
@@ -194,17 +231,19 @@ class Trainer(Trainer):
 
         # pd.DataFrame(recon_exp.cpu().numpy(),index= list(model.scg2id.keys())).to_csv('./outputs/'+basename+'-recon.csv')
 
-        outname = os.path.splitext(os.path.basename(self.args.input))[0]
-        predDF.to_csv('/media/disk/project/GRN/KEGNI/outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
+        # outname = os.path.splitext(os.path.basename(self.args.input))[0]
+        # predDF.to_csv('/media/disk/project/GRN/KEGNI/outputs/pred/' + ''.join([outname, '.txt']), sep='\t', index=False)
         if self.args.save_checkpoint:
             ckpt_folder = './checkpoints/'
             save_ckpt(step, model, self.optimizer,  basename,ckpt_folder)
         
         #TODO 正式代码中可以不保存    
         import pickle as pkl
-        save_path = 'results/' + basename.split('_')[0]+'/'
+        # save_path = 'results/' + basename.split('_')[0]+'/'
+        save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
+        os.makedirs(save_path, exist_ok=True)
         current_date = datetime.now().strftime("%Y%m%d%H")
-        filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}_dict.pkl"
+        filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{self.args.norm}_{current_date}_dict.pkl"
         os.makedirs(save_path, exist_ok=True)
         with open(filename, 'wb') as f:
             pkl.dump((loss,mae_loss, kgg_kgg_loss, kgg_scg_loss, scg_scg_loss, scg_kgg_loss,epr_values,pr_values,roc_values), f)
@@ -280,6 +319,7 @@ class Trainer(Trainer):
             dot_product_matrix = torch.mm(normalized_tensor, normalized_tensor.t())
             return dot_product_matrix
         z = torch.tanh(z)
+        # pred = torch.mm(z, z.t())
         pred = cosine_similarity(z)
         
         if self.args.device >= 0:

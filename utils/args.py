@@ -10,10 +10,11 @@ def parser_args():
     main_group.add_argument('--device', type=int, default=0)
 
     main_group.add_argument('--input', '-i',default='/media/disk/project/GRN/KEGNI/data/BEELINE/mESC_exp.csv', type=str, help='prefix of dataset ')
-    main_group.add_argument('--eval', '-e', action="store_true", default=True, help='evaluate,only for dataset with ground truth')
+    main_group.add_argument('--eval', '-e', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--save_checkpoint', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--load_checkpoint', type=str, help='load checkpoint for training')
     main_group.add_argument('--norm', '-p', type=int, default='2', help='norm for pred construction')
+    main_group.add_argument('--genes',type=int, default=None,help='norm for pred construction')
  
 
     mae_group.add_argument("--num_hidden", type=int, default=256, help="number of hidden units")

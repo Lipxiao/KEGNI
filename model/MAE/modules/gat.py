@@ -34,6 +34,9 @@ class GAT(nn.Module):
         self.concat_out = concat_out
 
         last_activation = create_activation(activation) if encoding else None
+        # last_activation = nn.Sequential(last_activation, create_activation("tanh"))
+        # last_activation = create_activation("tanh") if encoding else None
+
         last_residual = (encoding and residual)
         last_norm = norm if encoding else None
 
@@ -152,7 +155,7 @@ class GATConv(nn.Module):
         else:
             self.register_buffer('res_fc', None)
         self.reset_parameters()
-        self.activation = activation
+        # self.activation = activation
         # if norm is not None:
         #     self.norm = norm(num_heads * out_feats)
         # else:
@@ -161,6 +164,7 @@ class GATConv(nn.Module):
         self.norm = norm
         if norm is not None:
             self.norm = norm(num_heads * out_feats)
+        self.activation = activation
 
     def reset_parameters(self):
         """
