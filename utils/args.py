@@ -6,7 +6,7 @@ def parser_args():
     kge_group = parser.add_argument_group('kge_group')
     mae_group = parser.add_argument_group('mae_group')
 
-    main_group.add_argument("--max_steps", type=int,  default=100)
+    main_group.add_argument("--max_steps", type=int,  default=600)
     main_group.add_argument('--device', type=int, default=0)
 
     main_group.add_argument('--dir', default='/media/disk/project/GRN/KEGNI/', type=str, help='prefix of dataset ')

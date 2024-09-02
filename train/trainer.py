@@ -212,7 +212,7 @@ class Trainer(Trainer):
             #     **{f"best_roc_step_{key}": info['best_roc_step'] for key, info in best_models.items()},
             # })
             df = pd.DataFrame({
-                'max_steps': [100],  # 假设 max_steps 是一个已知的值
+                'max_steps': [max_steps],  # 假设 max_steps 是一个已知的值
                 **{"best_epr_{}".format(key): "{:.5f}".format(info['epr']) for key, info in best_models.items()},
                 **{"best_epr_step_{}".format(key): info['best_epr_step'] for key, info in best_models.items()},
                 **{"pr_{}".format(key): "{:.5f}".format(info['pr']) for key, info in best_models.items()},
