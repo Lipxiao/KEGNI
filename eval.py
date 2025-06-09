@@ -43,3 +43,7 @@ if __name__ == '__main__':
     predDF = pd.read_csv(args.predDF, sep = ',',header = 0, index_col = None)
     trueDF = pd.read_csv(args.trueDF, sep = ',',header = 0, index_col = None)
     epr,pr,roc = MultiEval(predDF,trueDF)
+    print(f"Early Precision: {epr}")
+    print(f"Precision: {pr}")
+    print(f"ROC: {roc}")
+    

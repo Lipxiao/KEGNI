@@ -49,6 +49,7 @@ def parser_args():
     kge_group.add_argument('-b', '--batch_size', default=256, type=int)
     kge_group.add_argument('-r', '--regularization', default=0.00001, type=float)
     kge_group.add_argument('--kge_lr',  default=1e-3, type=float)
+    kge_group.add_argument('--lambda_kge',  default=1, type=float)
 
     args = parser.parse_args()
 

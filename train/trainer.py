@@ -224,8 +224,8 @@ class Trainer(Trainer):
 
             save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
             current_date = datetime.now().strftime("%Y%m%d%H")
-            # filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
-            filename = str.join('', [save_path, basename.split('_')[0], str(self.args.n_neighbors), str(self.args.num_hidden), str(self.args.num_heads), str(self.args.num_layers), current_date, '.csv'])
+            filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
+            # filename = str.join('', [save_path, basename.split('_')[0], str(self.args.n_neighbors), str(self.args.num_hidden), str(self.args.num_heads), str(self.args.num_layers), current_date, '.csv'])
             os.makedirs(save_path, exist_ok=True)
             df.to_csv(os.path.join(filename), index=False)
                                   
@@ -309,7 +309,7 @@ class Trainer(Trainer):
 
         if sc_dataset_inputs:
             mae_loss, z = self.mae_loss_fn(model=model, sc_dataset_inputs=sc_dataset_inputs)
-            total_loss += mae_loss
+            # total_loss += mae_loss
 
         kge_total_loss, kge_all_loss = self.kge_loss_fn(model=model, embedding=z,
                                                      scg_scg_inputs=scg_scg_inputs,
@@ -329,9 +329,9 @@ class Trainer(Trainer):
         all_loss['scg_scg_loss'] = kge_all_loss['scg_scg_loss'].item()
         all_loss['kgg_kgg_loss'] = kge_all_loss['kgg_kgg_loss'].item()
         all_loss['mae_loss'] = mae_loss.item()
-        total_loss += kge_total_loss
-
-        return total_loss, all_loss
+        # total_loss += kge_total_loss
+        total_loss = mae_loss + self.args.lambda_kge * kge_total_loss
+        return total_loss, all_loss 
     
     def recon(self, z):
         norm = self.args.norm
