@@ -224,8 +224,8 @@ class Trainer(Trainer):
 
             save_path = 'results/' + basename.split('_')[0]+'/'+ datetime.now().strftime("%Y%m%d")+ '/'
             current_date = datetime.now().strftime("%Y%m%d%H")
-            # filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
-            filename = str.join('', [save_path, basename.split('_')[0], str(self.args.n_neighbors), str(self.args.num_hidden), str(self.args.num_heads), str(self.args.num_layers), current_date, '.csv'])
+            filename = f"{save_path}{basename.split('_')[0]}_{self.args.n_neighbors}_{self.args.num_hidden}_{self.args.num_heads}_{self.args.num_layers}_{current_date}.csv"
+            # filename = str.join('', [save_path, basename.split('_')[0], str(self.args.n_neighbors), str(self.args.num_hidden), str(self.args.num_heads), str(self.args.num_layers), current_date, '.csv'])
             os.makedirs(save_path, exist_ok=True)
             df.to_csv(os.path.join(filename), index=False)
                                   
@@ -342,8 +342,12 @@ class Trainer(Trainer):
             return dot_product_matrix
         z = torch.tanh(z)
         # pred = torch.mm(z, z.t())
-        pred = cosine_similarity(z)
         
+        if norm == -1:  
+            pred = torch.mm(z, z.t())
+        else:
+            pred = cosine_similarity(z)
+            
         if self.args.device >= 0:
             pred = pred.cpu()
         pred = pd.DataFrame(pred.numpy(), index=list(self.model.scg2id.keys()), columns=list(self.model.scg2id.keys()))

@@ -3,10 +3,8 @@ import pandas as pd
 import argparse
 def parser_args():
     parser = argparse.ArgumentParser(description='Argument Parser')
-    parser.add_argument("--predDF", "-p",type = str,help='predicted edges dataframe',
-                        default="/media/disk/project/crosstalk/BEELINE/Beeline/outputs/scRNA/hESC/PPCOR/rankedEdges.csv")
-    parser.add_argument('--trueDF', '-t',type = str, help='True edges dataframe',
-                        default="/media/disk/project/crosstalk/BEELINE/Beeline/inputs/scRNA/hESC/hESC-ChIP-network.csv")
+    parser.add_argument("--predDF", "-p",type = str,default= None, help='predicted edges dataframe')
+    parser.add_argument('--trueDF', '-t',type = str,default= None, help='True edges dataframe')
     args = parser.parse_args()
     return args
 
@@ -15,9 +13,16 @@ def MultiEval(predDF,trueDF):
 
     predDF['Gene1'] = predDF['Gene1'].str.upper()
     predDF['Gene2'] = predDF['Gene2'].str.upper()
+    predDF.sort_values(by='EdgeWeight', ascending=False, inplace=True)
+
+    trueEdgesDF = trueDF.loc[(trueDF['Gene1'] != trueDF['Gene2'])]
+    trueEdgesDF.drop_duplicates(keep = 'first', inplace=True)
+    trueEdgesDF.reset_index(drop=True, inplace=True)
+    
+    
     unique_genes = pd.concat([predDF['Gene2'], predDF['Gene1']]).unique()
 
-    netDF = trueDF.iloc[:, :2].copy()
+    netDF = trueEdgesDF.iloc[:, :2].copy()
     netDF.columns = ['Gene1','Gene2']
     netDF['Gene1'] = netDF['Gene1'].str.upper()
     netDF['Gene2'] = netDF['Gene2'].str.upper()
@@ -43,3 +48,5 @@ if __name__ == '__main__':
     predDF = pd.read_csv(args.predDF, sep = ',',header = 0, index_col = None)
     trueDF = pd.read_csv(args.trueDF, sep = ',',header = 0, index_col = None)
     epr,pr,roc = MultiEval(predDF,trueDF)
+    print(f"Early Precision: {epr}")
+    print(f"aupr: {pr}")
