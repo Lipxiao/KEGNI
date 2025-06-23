@@ -1,0 +1,93 @@
+mESC:
+  n_neighbors: 30
+  num_hidden: 512
+  num_heads: 4
+  num_layers: 4
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+mDC:
+  n_neighbors: 20
+  num_hidden: 128
+  num_heads: 4
+  num_layers: 4
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+mHSC-E:
+  n_neighbors: 20
+  num_hidden: 128
+  num_heads: 4
+  num_layers: 2
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+mHSC-L:
+  n_neighbors: 20
+  num_hidden: 256
+  num_heads: 4
+  num_layers: 2
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+mHSC-GM:
+  n_neighbors: 30
+  num_hidden: 512
+  num_heads: 4
+  num_layers: 4
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+
+hESC:
+  n_neighbors: 30
+  num_hidden: 512
+  num_heads: 4
+  num_layers: 3
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+hHep:
+  n_neighbors: 20
+  num_hidden: 128
+  num_heads: 4
+  num_layers: 3
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+Cop1:
+  n_neighbors: 30
+  num_hidden: 512
+  num_heads: 4
+  num_layers: 2
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+beta:
+  max_step: 600
+  n_neighbors: 20
+  num_hidden: 256
+  num_heads: 4
+  num_layers: 4
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+
+pbmc:
+  max_step: 1000
+  n_neighbors: 30
+  num_hidden: 256
+  num_heads: 4
+  num_layers: 2
+  mae_lr: 0.0001
+  batch_size: 256
+  kge_lr: 0.0001
+

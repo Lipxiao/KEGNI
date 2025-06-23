@@ -9,12 +9,12 @@ def parser_args():
     main_group.add_argument("--max_steps", type=int,  default=600)
     main_group.add_argument('--device', type=int, default=0)
 
-    main_group.add_argument('--dir', default='/media/disk/project/GRN/KEGNI/', type=str, help='prefix of dataset ')
-    main_group.add_argument('--input', '-i',default='/media/disk/project/GRN/KEGNI/data/BEELINE/mESC_exp.csv', type=str, help='prefix of dataset ')
+    main_group.add_argument('--dir', default='./', type=str, help='prefix of dataset ')
+    main_group.add_argument('--input', '-i',default='data/BEELINE/TF500/mESC_exp.csv', type=str, help='prefix of dataset ')
     main_group.add_argument('--eval', '-e', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--save_checkpoint', action="store_true", default=False, help='evaluate,only for dataset with ground truth')
     main_group.add_argument('--load_checkpoint', type=str, help='load checkpoint for training')
-    main_group.add_argument('--norm', '-p', type=int, default='2', help='norm for pred construction')
+    main_group.add_argument('--norm', '-p', type=int, default=-1, help='norm for pred construction')
     main_group.add_argument('--genes',type=int, default=None,help='norm for pred construction')
  
 
@@ -40,7 +40,7 @@ def parser_args():
     mae_group.add_argument("--alpha_l", type=float, default=1, help="`pow`coefficient for `sce` loss")
     mae_group.add_argument("--concat_hidden", action="store_true", default=False)
     
-    kge_group.add_argument('--data_path',default='./data/KG/KEGG_mESC.tsv', type=str)
+    kge_group.add_argument('--data_path',default='data/KG/KEGG_mESC.tsv', type=str)
     kge_group.add_argument('--model', default='ComplEx', type=str)
     kge_group.add_argument('--negative_sample_size', default=16, type=int)
     kge_group.add_argument('-g', '--gamma', default=12.0, type=float)
@@ -49,6 +49,7 @@ def parser_args():
     kge_group.add_argument('-b', '--batch_size', default=256, type=int)
     kge_group.add_argument('-r', '--regularization', default=0.00001, type=float)
     kge_group.add_argument('--kge_lr',  default=1e-3, type=float)
+    kge_group.add_argument('--lambda_kge',  default=1, type=float)
 
     args = parser.parse_args()
 
